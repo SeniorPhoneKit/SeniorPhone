@@ -440,4 +440,28 @@ final class Contacts {
     private static String orEmpty(String s) {
         return s == null ? "" : s.trim();
     }
+
+    /**
+     * The contact whose saved number is the same as {@code number} by our own rule
+     * (Automation.sameNumber: same digits, or +CC vs. national with trunk 0), or -1.
+     * For when Android's PhoneLookup misses because the phone's country does not
+     * match the numbers ("0170 …" vs. "+49 170 …"). Background thread.
+     */
+    static long idByNumber(ContentResolver cr, String number) {
+        java.util.List<Long> ids = new java.util.ArrayList<>();
+        java.util.List<String> numbers = new java.util.ArrayList<>();
+        String[] cols = { ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                ContactsContract.CommonDataKinds.Phone.NUMBER };
+        try (android.database.Cursor c = cr.query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI, cols, null, null, null)) {
+            while (c != null && c.moveToNext()) {
+                ids.add(c.getLong(0));
+                numbers.add(c.getString(1));
+            }
+        } catch (RuntimeException ignored) {
+            return -1;
+        }
+        int i = Automation.pickPhone(numbers, number);
+        return i < 0 ? -1 : ids.get(i);
+    }
 }

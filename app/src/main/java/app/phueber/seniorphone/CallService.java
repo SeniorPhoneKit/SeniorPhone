@@ -769,6 +769,19 @@ public final class CallService extends InCallService {
                 } catch (Throwable t) {
                     Log.w(TAG, "contact lookup", t);
                 }
+                if (name == null) { // PhoneLookup depends on the phone's country; try our own rule
+                    try {
+                        long fid = Contacts.idByNumber(cr, n);
+                        ContactInfo info = fid >= 0 ? Contacts.load(cr, fid) : null;
+                        if (info != null) {
+                            name = info.name;
+                            id = fid;
+                            if (info.photoUri != null) photo = loadPhoto(cr, Uri.parse(info.photoUri), size);
+                        }
+                    } catch (Throwable t) {
+                        Log.w(TAG, "contact fallback", t);
+                    }
+                }
                 final String fName = name;
                 final long fId = id;
                 final Bitmap fPhoto = photo;
