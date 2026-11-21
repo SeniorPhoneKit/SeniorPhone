@@ -117,7 +117,6 @@ public final class MissedCalls extends BroadcastReceiver {
                 .setSmallIcon(R.drawable.ic_contacts_call)
                 .setContentTitle(who)
                 .setContentText(text)
-                .setCategory(Notification.CATEGORY_MISSED_CALL)
                 .setWhen(when)
                 .setShowWhen(true)
                 .setAutoCancel(true)
@@ -125,6 +124,7 @@ public final class MissedCalls extends BroadcastReceiver {
                 .setContentIntent(open(c, contactId, number, false, 1))
                 .setDeleteIntent(PendingIntent.getBroadcast(c, 2,
                         new Intent(c, MissedCalls.class).setAction(ACTION_SEEN), immutable()));
+        if (android.os.Build.VERSION.SDK_INT >= 31) b.setCategory(Notification.CATEGORY_MISSED_CALL);
         if (number != null) {
             b.addAction(new Notification.Action.Builder(
                     android.graphics.drawable.Icon.createWithResource(c, R.drawable.ic_contacts_call),
@@ -166,7 +166,11 @@ public final class MissedCalls extends BroadcastReceiver {
         clearInTelecom(a.getApplicationContext());
     }
 
-    /** Telecom forgets the count and marks the calls read; it then sends count 0. */
+    /**
+     * Telecom forgets the count and marks the calls read; it then sends count 0.
+     * Allowed for the default phone app without MODIFY_PHONE_STATE.
+     */
+    @android.annotation.SuppressLint("MissingPermission")
     private static void clearInTelecom(Context c) {
         try {
             TelecomManager tm = c.getSystemService(TelecomManager.class);

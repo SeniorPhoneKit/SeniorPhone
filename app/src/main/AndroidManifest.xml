@@ -56,8 +56,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <!-- "Show the call log" (e.g. the system's missed-call shortcut): the
-                 app has no call-log screen, the contact list is where calling starts. -->
-            <intent-filter>
+                 app has no call-log screen, the contact list is where calling starts.
+                 Sent with only the type, no URL (as for every phone app). -->
+            <intent-filter tools:ignore="AppLinkUrlError">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/calls" />
