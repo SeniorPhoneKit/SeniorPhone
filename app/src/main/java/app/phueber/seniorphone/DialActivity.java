@@ -53,7 +53,7 @@ public final class DialActivity extends Activity {
     private TextView display;
     /** Below the number: whose it is, or a contact whose number starts with it (DialMatch). */
     private Button match;
-    /** The address book's numbers, loaded once in the background; empty until then or without permission. */
+    /** The address book's numbers, loaded in the background on every onResume; empty until then or without permission. */
     private java.util.List<DialMatch.Entry> book = new java.util.ArrayList<>();
     private Button delete;
     private Button call;
@@ -71,7 +71,6 @@ public final class DialActivity extends Activity {
                 : fromIntent(getIntent());
         setContentView(build());
         update();
-        loadBook();
         // The Phone icon is a front door of its own, so the role question belongs here too.
         // Not over a number another app handed us (ACTION_DIAL / tel:): that would interrupt it.
         Intent in = getIntent();
@@ -125,6 +124,9 @@ public final class DialActivity extends Activity {
             recreate(); // the helper changed the colours meanwhile
             return;
         }
+        // Again on every return: a contact added meanwhile, or the permission just
+        // granted, is known at once. Read in the background, so this is cheap.
+        loadBook();
         // Key tones like every phone, unless the phone's own setting turned them off.
         if (Settings.System.getInt(getContentResolver(), Settings.System.DTMF_TONE_WHEN_DIALING, 1) != 0) {
             try {
@@ -418,7 +420,7 @@ public final class DialActivity extends Activity {
         }
     }
 
-    /** Reads every contact number once, off the main thread, then refreshes the hint. */
+    /** Reads every contact number off the main thread, then refreshes the hint. */
     private void loadBook() {
         if (!Contacts.canRead(this)) return;
         android.content.ContentResolver cr = getContentResolver();
