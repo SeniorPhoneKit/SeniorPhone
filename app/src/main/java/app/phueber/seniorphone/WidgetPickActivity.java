@@ -69,6 +69,13 @@ public final class WidgetPickActivity extends Activity {
             finish();
             return;
         }
+        // Changing the person of a placed widget is the helper's job: not while
+        // locked. (Exported, so any app could start it.) A new widget still gets
+        // its person, or the home screen would drop it.
+        if (PhoneWidgets.pick(this, widgetId) != null && new Store(this).locked()) {
+            finish();
+            return;
+        }
         Ui.applyTheme(this);
         setContentView(build());
         if (Contacts.canRead(this)) {
