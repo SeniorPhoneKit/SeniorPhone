@@ -8,7 +8,7 @@
     android:initialLayout="@layout/widget_person"
     android:minWidth="40dp"
     android:minHeight="40dp"
-    android:previewImage="@drawable/ic_launcher_contacts"
+    android:previewImage="@drawable/widget_preview_person_image"
     android:previewLayout="@layout/widget_person_preview"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="1"

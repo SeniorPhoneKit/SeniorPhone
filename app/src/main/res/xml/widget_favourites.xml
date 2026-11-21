@@ -9,7 +9,7 @@
     android:minHeight="110dp"
     android:minResizeWidth="180dp"
     android:minResizeHeight="80dp"
-    android:previewImage="@drawable/ic_launcher_contacts"
+    android:previewImage="@drawable/widget_preview_favourites_image"
     android:previewLayout="@layout/widget_favourites_preview"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="4"
