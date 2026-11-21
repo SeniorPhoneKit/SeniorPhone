@@ -212,6 +212,7 @@ public final class EditContactActivity extends Activity {
         ContentResolver cr = getContentResolver();
         Contacts.BACKGROUND.execute(() -> {
             long id = Contacts.save(cr, d, f, l, n);
+            if (id >= 0) PhoneWidgets.changed(this);
             Contacts.MAIN.post(() -> {
                 if (isDestroyed()) return;
                 saving = false;

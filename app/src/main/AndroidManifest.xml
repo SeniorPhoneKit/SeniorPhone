@@ -152,6 +152,53 @@
             </intent-filter>
         </activity>
 
+        <!-- Home-screen widgets: one person (one cell) and the favourites (wide).
+             See PhoneWidgets. A tap only ever opens "Call …?". -->
+        <receiver
+            android:name=".PersonWidget"
+            android:exported="true"
+            android:label="@string/widget_person_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_person" />
+        </receiver>
+        <receiver
+            android:name=".FavouritesWidget"
+            android:exported="true"
+            android:label="@string/widget_favourites_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_favourites" />
+        </receiver>
+        <service
+            android:name=".FavouritesWidgetService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <service
+            android:name=".ContactsChangedJob"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <!-- Choosing the widget's person. Exported: older home screens start it
+             themselves. It only accepts our own one-person widgets. -->
+        <activity
+            android:name=".WidgetPickActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:taskAffinity=""
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <!-- Lock, unlock, colours: the helper's settings, no permission needed
              (the lock is a guard rail, not security). -->
         <receiver

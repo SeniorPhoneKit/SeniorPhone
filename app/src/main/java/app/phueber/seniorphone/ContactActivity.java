@@ -335,6 +335,7 @@ public final class ContactActivity extends Activity {
                     long gone = id;
                     Contacts.BACKGROUND.execute(() -> {
                         boolean ok = Contacts.delete(cr, gone);
+                        if (ok) PhoneWidgets.changed(this);
                         Contacts.MAIN.post(() -> {
                             if (isDestroyed()) return;
                             if (ok) {

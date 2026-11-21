@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home-screen widgets. The labels are what the widget list shows, and what
+         SeniorLauncher writes under a one-cell widget. -->
+    <string name="widget_person_label">Call</string>
+    <string name="widget_person_description">One person: their picture and name, big. A tap asks “Call …?” first.</string>
+    <string name="widget_favourites_label">Favourites</string>
+    <string name="widget_favourites_description">Your favourites with picture and name. A tap asks “Call …?” first.</string>
+
+    <!-- Choosing the person (WidgetPickActivity) -->
+    <string name="widget_pick_title">Who should this button call?</string>
+    <string name="widget_pick_none">No contacts with a phone number yet.</string>
+    <string name="widget_pick_permission">Without access to contacts, no one can be chosen.</string>
+
+    <!-- On the widgets -->
+    <string name="widget_allow">Allow contacts</string>
+    <string name="widget_allow_text">Tap to open the phone app and allow access to contacts.</string>
+    <string name="widget_no_favourites">No favourites yet</string>
+    <string name="widget_open_contacts">Tap to open Contacts.</string>
+    <!-- TalkBack: the one-person widget when its contact was deleted. -->
+    <string name="widget_gone_cd">Contact not found. Opens the contacts.</string>
+
+    <!-- Sample contacts in the widget list's previews. -->
+    <string name="widget_preview_first" translatable="false">Maria</string>
+    <string name="widget_preview_initial" translatable="false">M</string>
+    <string name="widget_preview_name" translatable="false">Maria Schmidt</string>
+    <string name="widget_preview_initial2" translatable="false">P</string>
+    <string name="widget_preview_name2" translatable="false">Peter Huber</string>
+</resources>

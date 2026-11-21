@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widgets auf der Startseite -->
+    <string name="widget_person_label">Anrufen</string>
+    <string name="widget_person_description">Eine Person: Bild und Name, groß. Ein Tippen fragt zuerst „… anrufen?“.</string>
+    <string name="widget_favourites_label">Favoriten</string>
+    <string name="widget_favourites_description">Ihre Favoriten mit Bild und Name. Ein Tippen fragt zuerst „… anrufen?“.</string>
+
+    <!-- Person auswählen (WidgetPickActivity) -->
+    <string name="widget_pick_title">Wen soll dieser Knopf anrufen?</string>
+    <string name="widget_pick_none">Noch keine Kontakte mit Telefonnummer.</string>
+    <string name="widget_pick_permission">Ohne Zugriff auf die Kontakte kann niemand ausgewählt werden.</string>
+
+    <!-- Auf den Widgets -->
+    <string name="widget_allow">Kontakte erlauben</string>
+    <string name="widget_allow_text">Tippen öffnet die Telefon-App, um den Zugriff auf Kontakte zu erlauben.</string>
+    <string name="widget_no_favourites">Noch keine Favoriten</string>
+    <string name="widget_open_contacts">Tippen öffnet die Kontakte.</string>
+    <string name="widget_gone_cd">Kontakt nicht gefunden. Öffnet die Kontakte.</string>
+</resources>

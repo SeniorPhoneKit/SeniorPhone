@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One person: the round picture (photo or letter, drawn in code) and the first
+     name below it on a pill in the theme's card colour, so it reads on any
+     wallpaper. The whole widget is one button. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/person_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="2dp">
+
+    <ImageView
+        android:id="@+id/person_avatar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter" />
+
+    <!-- RelativeLayout, not FrameLayout: a FrameLayout around a wrap_content text
+         leaves a match_parent background at one pixel. -->
+    <RelativeLayout
+        android:id="@+id/person_pill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp">
+
+        <ImageView
+            android:id="@+id/person_pill_bg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/person_name"
+            android:layout_alignEnd="@+id/person_name"
+            android:layout_alignStart="@+id/person_name"
+            android:layout_alignTop="@+id/person_name"
+            android:importantForAccessibility="no"
+            android:scaleType="fitXY"
+            android:src="@drawable/widget_round" />
+
+        <TextView
+            android:id="@+id/person_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:importantForAccessibility="no"
+            android:maxLines="1"
+            android:paddingStart="10dp"
+            android:paddingTop="1dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="2dp"
+            android:textColor="@color/text_black"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+</LinearLayout>

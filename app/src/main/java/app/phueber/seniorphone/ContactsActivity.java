@@ -157,6 +157,7 @@ public final class ContactsActivity extends Activity {
     protected void onStart() {
         super.onStart();
         observe();
+        PhoneWidgets.watch(this); // keeps placed widgets in step while the app runs
         // The helper may lock or unlock the home screen while we are open
         // (split screen, or quick switching): follow at once.
         try {
@@ -241,6 +242,8 @@ public final class ContactsActivity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, results);
         if (requestCode != REQUEST_CONTACTS) return;
         observe();
+        PhoneWidgets.changed(this); // "Allow contacts" on the widgets becomes people
+        PhoneWidgets.watch(this);
         showContent();
         // Then, once, notifications (Android 13+): the incoming-call notification
         // and the "back to the call" one. Calls still work without them.
@@ -592,6 +595,7 @@ public final class ContactsActivity extends Activity {
         ContentResolver cr = getContentResolver();
         Contacts.BACKGROUND.execute(() -> {
             Contacts.setStarred(cr, c.id, to);
+            PhoneWidgets.changed(this);
             Contacts.MAIN.post(() -> { if (!isDestroyed()) load(); });
         });
     }

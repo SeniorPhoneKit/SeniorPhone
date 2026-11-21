@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One launcher cell, like an app icon. The helper picks the person when adding
+     it (required configuration) and can change it later (reconfigurable). Never
+     refreshed on a timer: PhoneWidgets redraws it when the contacts change. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="app.phueber.seniorphone.WidgetPickActivity"
+    android:description="@string/widget_person_description"
+    android:initialLayout="@layout/widget_person"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:previewImage="@drawable/ic_launcher_contacts"
+    android:previewLayout="@layout/widget_person_preview"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable" />

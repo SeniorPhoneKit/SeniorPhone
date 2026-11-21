@@ -85,5 +85,6 @@ public final class Store {
 
     public synchronized void setTheme(Palette.Theme theme) {
         prefs.edit().putString(K_THEME, theme.name()).commit();
+        PhoneWidgets.changed(app); // the widgets draw in the app's colours too
     }
 }

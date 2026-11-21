@@ -45,6 +45,12 @@ colour theme (`Store`).
 | `AutomationActivity` | Invisible trampoline for CALL, OPEN_CONTACT, OPEN_DIALPAD, OPEN_CONTACTS: finds the contact off the main thread, opens the page / pad / list, closes. Never calls. |
 | `AutomationReceiver` | Broadcasts LOCK, UNLOCK, SET_THEME, through `Store` on a background thread (goAsync). |
 | `CallControlReceiver` | Broadcasts ANSWER, HANG_UP, SPEAKER, LOUDER through `CallService`, guarded by ANSWER_PHONE_CALLS. |
+| `PersonWidget` | Widget: one person, one cell. Round photo or letter, the first name big; tap → their page with "Call …?". Deleted: "?" → the list. |
+| `FavouritesWidget`, `FavouritesWidgetService` | Widget: the favourites as big rows (RemoteViewsService, so 8–15 alike); tap a row → "Call …?". Empty: "No favourites yet" → the list. |
+| `WidgetPickActivity` | The one-person widget's configuration: contacts, favourites first, search. Cancel = RESULT_CANCELED. Also reconfigure. |
+| `PhoneWidgets` | What both widgets share: the remembered person (id + lookup key), coalesced refresh, ContentObserver, round pictures, taps. |
+| `ContactsChangedJob` | JobScheduler content trigger on the address book: redraws the widgets while the app is not running. |
+| `WidgetModel` | Pure: first name for the button, favourites order, the stored pick. Unit tested. |
 | `PinDialog` | Choose a PIN (twice); enter it to unlock. The unlock prompt closes after 10 s without typing. |
 
 ## A call can always be answered, declined and ended
@@ -126,6 +132,36 @@ what a command may do:
 
 Broadcasts are preferred: they need no overlay permission from the sender
 when it runs in the background. Nothing is reported back.
+
+## Widgets
+
+Two home-screen widgets, in the app's own colours (`Store` theme), big text:
+
+- **One person** (`PersonWidget`, 1x1): the helper chooses the person when
+  adding it (`WidgetPickActivity`, a required configuration, so SeniorLauncher
+  runs it; `reconfigurable` to change it later). Remembered by contact id
+  and lookup key, so a merged or re-numbered contact is still found
+  (`Contacts.find`). SeniorLauncher shows it like an app tile, with the
+  widget's label ("Call") below.
+- **Favourites** (`FavouritesWidget`, wide, 4x2 by default, resizable taller
+  but never one cell): one row per starred contact, in the contact list's
+  order (`WidgetModel.favourites`). Rows come from a `RemoteViewsService`
+  rather than `RemoteCollectionItems` (31+ only, and all photos in one
+  parcel); its factory clears the calling identity, or the contacts provider
+  would check the home screen's permissions.
+
+A tap never calls: it opens the contact page with `EXTRA_ASK_CALL`, the same
+"Call Maria Schmidt?" question automation's CALL gets (with several numbers,
+the page with one Call per number). Nothing to show is said in words:
+deleted person "?", no favourites "No favourites yet", no contacts
+permission "Allow contacts"; each opens the contact list, which asks for the
+permission.
+
+Up to date without polling (`PhoneWidgets.changed`, coalesced into one
+redraw): a ContentObserver on the address book while the process lives; a
+`ContactsChangedJob` content trigger when it does not; and direct refreshes
+after the app's own star, save, delete, the contacts permission being
+granted, and a colour change. Only while a widget is placed.
 
 ## Permissions
 

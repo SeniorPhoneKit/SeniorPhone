@@ -49,6 +49,19 @@ Needs Android 8.0 or newer and a phone with a SIM card.
   the padlock to unlock. Forgotten PIN: the reset PIN **506614** always opens
   the lock.
 
+## Widgets on the home screen
+
+- **Call** (one person): one tile with a person's picture and first name.
+  When you add it, choose who it calls. A tap asks "Call Maria Schmidt?".
+- **Favourites**: your favourites, one big row each. A tap asks "Call …?".
+  It follows the stars in Contacts by itself.
+
+With SeniorLauncher: home screen → **Widgets** → search "Phone" → tap the
+widget. The Favourites widget can be made taller there (1 row, 2 rows, Full
+page). On other home screens: hold the home screen → Widgets → Phone. To
+change the person: remove the widget and add it again, or (where the home
+screen offers it) reconfigure it.
+
 ## Automation (Trigly, Tasker, …)
 
 Other apps can control SeniorPhone with intents to package
@@ -130,6 +143,20 @@ Benötigt Android 8.0 oder neuer und ein Telefon mit SIM-Karte.
   SeniorLauncher: hier Einstellungen → Sperren mit eigener PIN, zum Entsperren
   das Schloss gedrückt halten. PIN vergessen: die Reset-PIN **506614** öffnet
   die Sperre immer.
+
+### Widgets auf der Startseite
+
+- **Anrufen** (eine Person): eine Kachel mit Bild und Vorname einer Person.
+  Beim Hinzufügen wählen Sie, wen sie anruft. Ein Tippen fragt
+  „Maria Schmidt anrufen?“.
+- **Favoriten**: Ihre Favoriten, jede Person eine große Zeile. Ein Tippen fragt
+  „… anrufen?“. Folgt von selbst den Sternen in den Kontakten.
+
+Mit SeniorLauncher: Startseite → **Widgets** → „Telefon“ suchen → Widget
+antippen. Das Favoriten-Widget lässt sich dort höher machen (1 Zeile,
+2 Zeilen, Ganze Seite). Auf anderen Startseiten: Startseite gedrückt halten →
+Widgets → Telefon. Person ändern: Widget entfernen und neu hinzufügen, oder
+(wo die Startseite es anbietet) neu einrichten.
 
 ### Automatisierung (Trigly, Tasker, …)
 

@@ -124,6 +124,33 @@ final class Contacts {
         }
     }
 
+    /**
+     * The contact a widget remembered, without its numbers, or null when it is
+     * gone. Looked up by lookup key first, so a contact the address book has
+     * merged or re-numbered since is still found (with its new id).
+     */
+    static ContactInfo find(ContentResolver cr, long id, String lookupKey) {
+        Uri uri = lookupKey == null || lookupKey.isEmpty()
+                ? ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id)
+                : ContactsContract.Contacts.getLookupUri(id, lookupKey);
+        String[] projection = {
+                ContactsContract.Contacts._ID,
+                ContactsContract.Contacts.LOOKUP_KEY,
+                ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
+                ContactsContract.Contacts.STARRED,
+                ContactsContract.Contacts.PHOTO_URI,
+                ContactsContract.Contacts.PHOTO_THUMBNAIL_URI,
+        };
+        try (Cursor c = cr.query(uri, projection, null, null, null)) {
+            if (c == null || !c.moveToFirst()) return null;
+            String photo = c.getString(4) != null ? c.getString(4) : c.getString(5);
+            return new ContactInfo(c.getLong(0), c.getString(1), c.getString(2),
+                    c.getInt(3) != 0, photo, null);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
     private static List<ContactInfo.Phone> phones(ContentResolver cr, long id) {
         List<ContactInfo.Phone> out = new ArrayList<>();
         Set<String> seen = new HashSet<>();
