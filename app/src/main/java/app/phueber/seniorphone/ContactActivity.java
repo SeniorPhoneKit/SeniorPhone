@@ -70,6 +70,7 @@ public final class ContactActivity extends Activity {
         super.onCreate(savedInstanceState);
         shownTheme = Ui.applyTheme(this);
         store = new Store(this);
+        if (savedInstanceState == null) MissedCalls.seenFrom(this, getIntent());
         id = getIntent().getLongExtra(EXTRA_ID, -1);
         if (id < 0) {
             finish();

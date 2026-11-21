@@ -41,4 +41,9 @@
     <string name="call_not_allowed">Anrufe sind für diese App nicht erlaubt. Sie können dies in den Einstellungen des Telefons erlauben.</string>
     <string name="call_failed_to_start">Der Anruf konnte nicht gestartet werden.</string>
     <string name="call_already_on">Sie telefonieren gerade. Beenden Sie zuerst das Gespräch, dann rufen Sie erneut an.</string>
+    <string name="missed_channel">Verpasste Anrufe</string>
+    <string name="missed_channel_description">Wer angerufen hat, als Sie nicht rangehen konnten.</string>
+    <string name="missed_one">Verpasster Anruf · %1$s</string>
+    <string name="missed_many">%1$d verpasste Anrufe · zuletzt %2$s</string>
+    <string name="missed_call_back">Zurückrufen</string>
 </resources>

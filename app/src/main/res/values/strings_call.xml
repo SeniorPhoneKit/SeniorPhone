@@ -44,4 +44,11 @@
     <string name="call_not_allowed">Calling is not allowed for this app. You can allow it in the phone settings.</string>
     <string name="call_failed_to_start">The call could not be started.</string>
     <string name="call_already_on">You are already on a call. End it first, then call again.</string>
+    <string name="missed_channel">Missed calls</string>
+    <string name="missed_channel_description">Who called while you could not answer.</string>
+    <!-- %1$s is the time, e.g. 14:05 -->
+    <string name="missed_one">Missed call · %1$s</string>
+    <!-- %1$d is how many, %2$s the time of the last one -->
+    <string name="missed_many">%1$d missed calls · last at %2$s</string>
+    <string name="missed_call_back">Call back</string>
 </resources>

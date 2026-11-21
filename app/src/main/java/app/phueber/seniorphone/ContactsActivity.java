@@ -126,7 +126,10 @@ public final class ContactsActivity extends Activity {
         frame.addView(build());
         setContentView(frame);
         roleDialog = Role.askIfNeeded(this);
-        if (savedInstanceState == null) applySearch(getIntent());
+        if (savedInstanceState == null) {
+            applySearch(getIntent());
+            MissedCalls.seenFrom(this, getIntent());
+        }
     }
 
     /** Automation's OPEN_CONTACTS (or a name it could not pin down): the list, searched for it. */
@@ -151,6 +154,7 @@ public final class ContactsActivity extends Activity {
         if (search != null && search.length() > 0) search.setText("");
         if (listView != null) listView.setSelection(0);
         applySearch(intent);
+        MissedCalls.seenFrom(this, intent);
     }
 
     @Override

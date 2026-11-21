@@ -28,6 +28,8 @@ number pad, **Contacts** (blue address book) opens the contact list.
   Left the call screen? Contacts, the number pad and a person's page show a
   green **Back to the call**, and nobody else is called by mistake while the
   call is on.
+- **Missed call**: a notification with the caller's name and the time. Tap
+  it for their page; **Call back** asks "Call Maria Schmidt?" first.
 
 ## Install
 
@@ -129,6 +131,9 @@ Tastenfeld, **Kontakte** (blaues Adressbuch) öffnet die Kontaktliste.
   Kontakte, Tastenfeld und die Seite einer Person zeigen ein grünes
   **Zurück zum Anruf**, und während des Gesprächs wird niemand sonst
   versehentlich angerufen.
+- **Verpasster Anruf**: eine Benachrichtigung mit Name und Uhrzeit. Antippen
+  öffnet die Seite der Person; **Zurückrufen** fragt erst „Maria Schmidt
+  anrufen?“.
 
 ### Installieren
 

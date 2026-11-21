@@ -53,6 +53,13 @@
                 <category android:name="android.intent.category.APP_CONTACTS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <!-- "Show the call log" (e.g. the system's missed-call shortcut): the
+                 app has no call-log screen, the contact list is where calling starts. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/calls" />
+            </intent-filter>
         </activity>
 
         <!-- "Phone" on the home screen: the number pad. Also the target of "dial
@@ -138,6 +145,18 @@
             android:name=".CallActionReceiver"
             android:directBootAware="true"
             android:exported="false" />
+
+        <!-- Missed calls: as the phone app, Telecom sends us the count instead of
+             posting its own notification. Exported for Telecom; a forged broadcast
+             can at most show a notification whose Call back still asks first. -->
+        <receiver
+            android:name=".MissedCalls"
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
 
         <!-- Automation (Trigly, Tasker, ...): see Automation.java. Screens that must
              appear: an invisible trampoline that never places a call, only asks

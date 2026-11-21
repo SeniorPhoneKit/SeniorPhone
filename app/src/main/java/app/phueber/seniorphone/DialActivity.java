@@ -79,7 +79,10 @@ public final class DialActivity extends Activity {
                 && (in.getAction() == null || Intent.ACTION_MAIN.equals(in.getAction()))) {
             roleDialog = Role.askIfNeeded(this);
         }
-        if (savedInstanceState == null) askRequestedCall(in);
+        if (savedInstanceState == null) {
+            MissedCalls.seenFrom(this, in);
+            askRequestedCall(in);
+        }
     }
 
     /** Automation asked to call the number it typed in: the question, never the call itself. */
@@ -110,6 +113,7 @@ public final class DialActivity extends Activity {
             number = n;
             update();
         }
+        MissedCalls.seenFrom(this, intent);
         askRequestedCall(intent);
     }
 
