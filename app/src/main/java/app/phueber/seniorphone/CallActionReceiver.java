@@ -25,10 +25,12 @@ public final class CallActionReceiver extends BroadcastReceiver {
             int key = intent != null ? intent.getIntExtra(CallActivity.EXTRA_KEY, 0) : 0;
             if (!CallService.hasLiveCall()) {
                 boolean decline = ACTION_DECLINE.equals(action);
-                if (decline || ACTION_HANG_UP.equals(action)) {
+                if ((decline || ACTION_HANG_UP.equals(action)) && CallService.mayAwaitRebind()) {
                     // After a process restart Telecom may not have rebound us yet, so
                     // "no call" can be premature. Keep the tap and the notification;
                     // CallService.onCallAdded applies it. If no call shows up, clean up.
+                    // Not when Telecom already bound us in this process: then the call
+                    // is over, and a kept tap would end the next call.
                     CallService.endWhenBound(decline, context.getApplicationContext());
                 } else {
                     CallNotifier.cancelAll(context);

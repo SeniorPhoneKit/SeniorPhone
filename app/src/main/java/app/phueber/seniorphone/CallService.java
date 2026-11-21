@@ -135,6 +135,12 @@ public final class CallService extends InCallService {
     }
 
     private static CallService instance;
+    /**
+     * Telecom has bound us at least once in this process. A notification tap
+     * that finds no call then means the call is over, not that our process was
+     * restarted and is still waiting for Telecom (see endWhenBound).
+     */
+    private static boolean boundInThisProcess;
     private static final List<Entry> entries = new ArrayList<>();
     private static final List<Listener> listeners = new ArrayList<>();
     private static Ended lastEnded;
@@ -181,6 +187,7 @@ public final class CallService extends InCallService {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        boundInThisProcess = true;
         CallNotifier.ensureChannel(this);
     }
 
@@ -354,10 +361,20 @@ public final class CallService extends InCallService {
     private static final Handler pendingHandler = new Handler(Looper.getMainLooper());
 
     /**
+     * Whether a Decline / Hang up that finds no call may be kept for a call
+     * still to come: only when Telecom has not bound us in this process yet,
+     * i.e. the process was restarted under a notification. Otherwise the call
+     * it was meant for is over, and keeping the tap could end the next call.
+     */
+    static boolean mayAwaitRebind() {
+        return instance == null && !boundInThisProcess;
+    }
+
+    /**
      * Decline / Hang up tapped while we know no call (the process was restarted
-     * and Telecom has not rebound us yet). Remembered for a few seconds and
-     * applied to the primary call in onCallAdded (keys do not survive a restart).
-     * If no call arrives, the stale notifications are removed.
+     * and Telecom has not rebound us yet; see mayAwaitRebind). Remembered for a
+     * few seconds and applied to the primary call in onCallAdded (keys do not
+     * survive a restart). If no call arrives, the stale notifications are removed.
      */
     static void endWhenBound(boolean decline, Context ctx) {
         pendingDecline = decline;
