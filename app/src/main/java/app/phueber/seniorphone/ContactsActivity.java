@@ -534,6 +534,8 @@ public final class ContactsActivity extends Activity {
         if (observer != null || !Contacts.canRead(this)) return;
         observer = new ContentObserver(Contacts.MAIN) {
             @Override public void onChange(boolean selfChange) {
+                // A changed photo keeps its URI, and a missing one may have come.
+                Avatar.forget();
                 Contacts.MAIN.removeCallbacks(reload);
                 Contacts.MAIN.postDelayed(reload, RELOAD_DELAY_MS);
             }
@@ -850,6 +852,19 @@ public final class ContactsActivity extends Activity {
                 };
         /** Photos that failed to load: not tried again on every bind. */
         private static final Set<String> MISSING = Collections.synchronizedSet(new HashSet<>());
+        /** Bumped by forget(): a photo decoded before is not cached. Main thread. */
+        private static int epoch;
+
+        /**
+         * The address book changed: drop the cached and the missing photos. The
+         * photo URI stays the same when a photo is replaced, so the cache would
+         * otherwise show the old one until the process ends.
+         */
+        static void forget() {
+            epoch++;
+            PHOTOS.evictAll();
+            MISSING.clear();
+        }
 
         final FrameLayout view;
         private final Context context;
@@ -917,14 +932,16 @@ public final class ContactsActivity extends Activity {
             }
             ContentResolver cr = context.getContentResolver();
             int size = sizePx;
+            int asked = epoch;
             Contacts.BACKGROUND.execute(() -> {
                 Bitmap b = Contacts.photo(cr, uri, size);
                 Contacts.MAIN.post(() -> {
+                    boolean current = asked == epoch;
                     if (b == null) {
-                        MISSING.add(uri);
+                        if (current) MISSING.add(uri);
                         return;
                     }
-                    PHOTOS.put(key, b);
+                    if (current) PHOTOS.put(key, b);
                     if (uri.equals(wanted)) show(b);
                 });
             });
