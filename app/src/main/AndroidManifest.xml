@@ -132,5 +132,51 @@
         <receiver
             android:name=".CallActionReceiver"
             android:exported="false" />
+
+        <!-- Automation (Trigly, Tasker, ...): see Automation.java. Screens that must
+             appear: an invisible trampoline that never places a call, only asks
+             "Call X?" like ACTION_DIAL. -->
+        <activity
+            android:name=".AutomationActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="app.phueber.seniorphone.action.CALL" />
+                <action android:name="app.phueber.seniorphone.action.OPEN_CONTACT" />
+                <action android:name="app.phueber.seniorphone.action.OPEN_DIALPAD" />
+                <action android:name="app.phueber.seniorphone.action.OPEN_CONTACTS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Lock, unlock, colours: the helper's settings, no permission needed
+             (the lock is a guard rail, not security). -->
+        <receiver
+            android:name=".AutomationReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="app.phueber.seniorphone.action.LOCK" />
+                <action android:name="app.phueber.seniorphone.action.UNLOCK" />
+                <action android:name="app.phueber.seniorphone.action.SET_THEME" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Answer, hang up, speaker, louder: only for senders that hold
+             ANSWER_PHONE_CALLS themselves, so no app gains call control through us. -->
+        <receiver
+            android:name=".CallControlReceiver"
+            android:exported="true"
+            android:permission="android.permission.ANSWER_PHONE_CALLS">
+            <intent-filter>
+                <action android:name="app.phueber.seniorphone.action.ANSWER" />
+                <action android:name="app.phueber.seniorphone.action.HANG_UP" />
+                <action android:name="app.phueber.seniorphone.action.SPEAKER" />
+                <action android:name="app.phueber.seniorphone.action.LOUDER" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

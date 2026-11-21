@@ -75,6 +75,8 @@ public final class ContactsActivity extends Activity {
     /** A sync changes many rows in a burst; reload once it has settled. */
     private static final long RELOAD_DELAY_MS = 400;
     private static final String STATE_ASKED = "asked_permission";
+    /** Automation: open the list searched for this text (a string). */
+    static final String EXTRA_SEARCH = "search";
     private static final int ROW_MIN_DP = 80;
     private static final int STAR_DP = 72;
     private static final int AVATAR_DP = 56;
@@ -124,6 +126,15 @@ public final class ContactsActivity extends Activity {
         frame.addView(build());
         setContentView(frame);
         roleDialog = Role.askIfNeeded(this);
+        if (savedInstanceState == null) applySearch(getIntent());
+    }
+
+    /** Automation's OPEN_CONTACTS (or a name it could not pin down): the list, searched for it. */
+    private void applySearch(Intent intent) {
+        String q = intent != null ? intent.getStringExtra(EXTRA_SEARCH) : null;
+        if (q == null || search == null) return;
+        intent.removeExtra(EXTRA_SEARCH);
+        search.setText(q.trim());
     }
 
     @Override
@@ -139,6 +150,7 @@ public final class ContactsActivity extends Activity {
         // The app icon tapped again: start from the top, like a fresh start.
         if (search != null && search.length() > 0) search.setText("");
         if (listView != null) listView.setSelection(0);
+        applySearch(intent);
     }
 
     @Override
@@ -152,7 +164,15 @@ public final class ContactsActivity extends Activity {
         } catch (RuntimeException ignored) {
             // no launcher: our own lock only, checked in onResume
         }
+        store.listen(storeListener);
     }
+
+    /** Lock or colours changed while we are open (Settings elsewhere, or automation). */
+    private final android.content.SharedPreferences.OnSharedPreferenceChangeListener storeListener =
+            (prefs, key) -> {
+                if (store.theme() != shownTheme) recreate();
+                else this.lockObserver.onChange(false);
+            };
 
     private final ContentObserver lockObserver = new ContentObserver(Contacts.MAIN) {
         @Override public void onChange(boolean selfChange) {
@@ -190,6 +210,7 @@ public final class ContactsActivity extends Activity {
         }
         Contacts.MAIN.removeCallbacks(reload);
         getContentResolver().unregisterContentObserver(lockObserver);
+        store.unlisten(storeListener);
         dismissDialog();
     }
 

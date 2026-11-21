@@ -66,6 +66,19 @@ public final class Store {
         }
     }
 
+    /**
+     * Tells an open screen when the lock or the theme changes, also when an
+     * automation command changed it while the screen is in front. Called on
+     * the main thread. Keep a strong reference: SharedPreferences holds it weakly.
+     */
+    public void listen(SharedPreferences.OnSharedPreferenceChangeListener l) {
+        prefs.registerOnSharedPreferenceChangeListener(l);
+    }
+
+    public void unlisten(SharedPreferences.OnSharedPreferenceChangeListener l) {
+        prefs.unregisterOnSharedPreferenceChangeListener(l);
+    }
+
     public synchronized Palette.Theme theme() {
         return Palette.parse(prefs.getString(K_THEME, null));
     }

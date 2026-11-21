@@ -7,7 +7,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -523,19 +522,7 @@ public final class CallActivity extends Activity implements CallService.Listener
 
     /** One step up on the call volume, with the system's volume bar as feedback. */
     private void louder() {
-        try {
-            AudioManager am = getSystemService(AudioManager.class);
-            int now = am.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
-            int max = am.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL);
-            if (now >= max) {
-                Toast.makeText(this, R.string.call_loudest, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            am.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE,
-                    AudioManager.FLAG_SHOW_UI);
-        } catch (Throwable t) {
-            Log.w(TAG, "louder", t);
-        }
+        if (!CallService.louder(this)) Toast.makeText(this, R.string.call_loudest, Toast.LENGTH_SHORT).show();
     }
 
     /**

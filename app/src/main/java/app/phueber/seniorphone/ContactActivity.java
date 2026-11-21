@@ -35,6 +35,11 @@ import android.widget.Toast;
 public final class ContactActivity extends Activity {
     /** The aggregate contact id (ContactsContract.Contacts._ID), a long. */
     public static final String EXTRA_ID = "contact_id";
+    /**
+     * Automation's CALL: once the page shows, ask "Call X?" for this number (a
+     * string; "" = the contact's only number). Asked once, never called directly.
+     */
+    static final String EXTRA_ASK_CALL = "ask_call";
     private static final int AVATAR_DP = 160;
 
     private Store store;
@@ -111,7 +116,15 @@ public final class ContactActivity extends Activity {
         } catch (RuntimeException ignored) {
             // no launcher: our own lock only, checked in onResume
         }
+        store.listen(storeListener);
     }
+
+    /** Lock or colours changed while we are open (Settings elsewhere, or automation). */
+    private final android.content.SharedPreferences.OnSharedPreferenceChangeListener storeListener =
+            (prefs, key) -> {
+                if (store.theme() != shownTheme) recreate();
+                else this.lockObserver.onChange(false);
+            };
 
     private final ContentObserver lockObserver = new ContentObserver(Contacts.MAIN) {
         @Override public void onChange(boolean selfChange) {
@@ -124,6 +137,7 @@ public final class ContactActivity extends Activity {
     protected void onStop() {
         super.onStop();
         getContentResolver().unregisterContentObserver(lockObserver);
+        store.unlisten(storeListener);
         dismissDialog();
     }
 
@@ -153,6 +167,7 @@ public final class ContactActivity extends Activity {
                 }
                 contact = c;
                 show(c);
+                askRequestedCall(c);
             });
         });
     }
@@ -276,6 +291,29 @@ public final class ContactActivity extends Activity {
     private String typeLabel(ContactInfo.Phone ph) {
         CharSequence s = Phone.getTypeLabel(getResources(), ph.type, ph.label);
         return s == null || s.length() == 0 ? getString(R.string.contacts_number) : s.toString();
+    }
+
+    /**
+     * Automation asked to call: the question for the number it named (or, if
+     * that number is not one of the contact's, for the number as given), or
+     * for the only number. With several numbers and none named, the page
+     * itself is the question: one Call button per number.
+     */
+    private void askRequestedCall(ContactInfo c) {
+        String want = getIntent().getStringExtra(EXTRA_ASK_CALL);
+        if (want == null) return;
+        getIntent().removeExtra(EXTRA_ASK_CALL); // once, not again after Edit or a recreate
+        String name = ContactsActivity.displayName(this, c);
+        boolean several = c.phones.size() > 1;
+        if (want.isEmpty()) {
+            if (c.phones.size() == 1) askCall(name, null, c.phones.get(0).number);
+            return;
+        }
+        java.util.List<String> numbers = new java.util.ArrayList<>();
+        for (ContactInfo.Phone ph : c.phones) numbers.add(ph.number);
+        int i = Automation.pickPhone(numbers, want);
+        if (i < 0) askCall(name, null, want);
+        else askCall(name, several ? typeLabel(c.phones.get(i)) : null, c.phones.get(i).number);
     }
 
     private void askCall(String name, String type, String number) {

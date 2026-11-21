@@ -40,6 +40,10 @@ colour theme (`Store`).
 | `Store` | Own lock flag with PIN salt/hash, and theme; `locked()` is the launcher's lock or our own; `unlock(pin)` lifts both; the reset PIN (`Pin.RESET`) works for either. |
 | `LauncherLock` | Reads SeniorLauncher's lock, and lifts it with its PIN; when the launcher cannot answer, the last known value is used (while it is installed). |
 | `Pin` | PIN validation, salted hash, constant-time compare, and the fixed reset PIN. Same as SeniorAlert's. Pure. |
+| `Automation` | Pure: the automation actions and extras, lenient parsing of the string extras, which contact a name means and which of its numbers a number is. Unit tested. |
+| `AutomationActivity` | Invisible trampoline for CALL, OPEN_CONTACT, OPEN_DIALPAD, OPEN_CONTACTS: finds the contact off the main thread, opens the page / pad / list, closes. Never calls. |
+| `AutomationReceiver` | Broadcasts LOCK, UNLOCK, SET_THEME, through `Store` on a background thread (goAsync). |
+| `CallControlReceiver` | Broadcasts ANSWER, HANG_UP, SPEAKER, LOUDER through `CallService`, guarded by ANSWER_PHONE_CALLS. |
 | `PinDialog` | Choose a PIN (twice); enter it to unlock. The unlock prompt closes after 10 s without typing. |
 
 ## A call can always be answered, declined and ended
@@ -89,6 +93,38 @@ Every screen has its Back button at the bottom, like the other Senior apps,
 and it goes straight to the home screen in one tap (`Ui.goHome`), closing the
 app's screens behind it: back step by step (contact page, list, home) was too
 many steps. The system back gesture still goes one step.
+
+## Automation
+
+Automation apps (Trigly, Tasker) can send only an action and up to three
+string extras, so every extra is parsed from text, leniently, and a malformed
+one makes the command do nothing (`Automation`, unit tested). Three doors, by
+what a command may do:
+
+- Screens (`AutomationActivity`, activity start): a screen must appear.
+  CALL never places a call: it opens the contact page or number pad with the
+  usual "Call X?" question (`EXTRA_ASK_CALL`), so it gives another app no more
+  than ACTION_DIAL does. A name must match one contact; several or none open
+  the list searched for it. A number is looked up with Android's PhoneLookup,
+  then by its last nine digits (PhoneLookup depends on the phone's country).
+  The trampoline uses CLEAR_TOP so an open contact page or pad is replaced
+  rather than just brought to the front.
+- Call control (`CallControlReceiver`, broadcast): guarded by
+  `android:permission="android.permission.ANSWER_PHONE_CALLS"`, so only an
+  app that may answer and end calls itself can send it. It calls the same
+  `CallService` commands as the buttons (HANG_UP = the screen's call: decline
+  while ringing, else hang up), so screen and notifications follow. Without a
+  call it does nothing.
+- Settings (`AutomationReceiver`, broadcast, no permission): the lock is a
+  guard rail, not security, so the helper's automation may change it while
+  locked. LOCK is ignored with SeniorLauncher installed (one lock, set on the
+  home screen) and while already locked (it would replace the PIN the helper
+  knows). UNLOCK goes through `Store.unlock`, so it lifts the launcher's lock
+  with its PIN too. Open screens listen to `Store` (SharedPreferences
+  listener) and follow a lock or colour change at once.
+
+Broadcasts are preferred: they need no overlay permission from the sender
+when it runs in the background. Nothing is reported back.
 
 ## Permissions
 

@@ -49,6 +49,37 @@ Needs Android 8.0 or newer and a phone with a SIM card.
   the padlock to unlock. Forgotten PIN: the reset PIN **506614** always opens
   the lock.
 
+## Automation (Trigly, Tasker, …)
+
+Other apps can control SeniorPhone with intents to package
+`app.phueber.seniorphone`. Every action starts with
+`app.phueber.seniorphone.action.`; all extras are text. Placing a call always
+stops at the "Call Maria Schmidt?" question: no app can make SeniorPhone call
+by itself.
+
+| Send as | Action | Extras | What it does |
+|---|---|---|---|
+| Activity | `CALL` | `number` or `name` | Opens the person's page (or the number pad) and asks "Call …?". |
+| Activity | `OPEN_CONTACT` | `name` or `number` | Opens the person's page; if no one or several match, the list searched for the name. |
+| Activity | `OPEN_DIALPAD` | `number` (optional) | Opens the number pad, with the number typed in. |
+| Activity | `OPEN_CONTACTS` | `name` (optional) | Opens the contact list, searched for the name. |
+| Broadcast | `ANSWER` | – | Answers the ringing call. * |
+| Broadcast | `HANG_UP` | – | Declines the ringing call, or hangs up. * |
+| Broadcast | `SPEAKER` | `state`: `on`, `off`, `toggle` (default) | Speaker on or off. * |
+| Broadcast | `LOUDER` | – | Call one step louder. * |
+| Broadcast | `LOCK` | `pin` (4–8 digits) | Locks with this PIN. Only without SeniorLauncher (lock the home screen instead) and only while unlocked. |
+| Broadcast | `UNLOCK` | `pin` | Unlocks with the PIN or the reset PIN; also the home screen's lock. |
+| Broadcast | `SET_THEME` | `theme`: `light`, `dark`, `high_contrast`, `colourful` | Changes the colours. |
+
+\* Only from apps that hold the permission to answer phone calls
+(`ANSWER_PHONE_CALLS`). Without a call they do nothing. A name matches when
+it is the contact's name (case and accents do not matter) or part of exactly
+one contact's name.
+
+Example (Trigly, action "Fire an intent"): send mode **Broadcast**, package
+`app.phueber.seniorphone`, action `app.phueber.seniorphone.action.SET_THEME`,
+extra `theme` = `dark` — e.g. at sunset.
+
 ## SeniorPhone (Deutsch)
 
 Ein sehr einfaches Telefon für Android, gemacht für Senioren.
@@ -99,6 +130,37 @@ Benötigt Android 8.0 oder neuer und ein Telefon mit SIM-Karte.
   SeniorLauncher: hier Einstellungen → Sperren mit eigener PIN, zum Entsperren
   das Schloss gedrückt halten. PIN vergessen: die Reset-PIN **506614** öffnet
   die Sperre immer.
+
+### Automatisierung (Trigly, Tasker, …)
+
+Andere Apps können SeniorPhone mit Intents an das Paket
+`app.phueber.seniorphone` steuern. Jede Aktion beginnt mit
+`app.phueber.seniorphone.action.`; alle Extras sind Text. Ein Anruf endet
+immer bei der Frage „Maria Schmidt anrufen?“: Keine App kann SeniorPhone von
+selbst anrufen lassen.
+
+| Senden als | Aktion | Extras | Was passiert |
+|---|---|---|---|
+| Activity | `CALL` | `number` oder `name` | Öffnet die Seite der Person (oder das Tastenfeld) und fragt „… anrufen?“. |
+| Activity | `OPEN_CONTACT` | `name` oder `number` | Öffnet die Seite der Person; passt niemand oder mehrere, die Liste mit dem Namen gesucht. |
+| Activity | `OPEN_DIALPAD` | `number` (optional) | Öffnet das Tastenfeld, mit der Nummer schon eingetippt. |
+| Activity | `OPEN_CONTACTS` | `name` (optional) | Öffnet die Kontaktliste, nach dem Namen gesucht. |
+| Broadcast | `ANSWER` | – | Nimmt den klingelnden Anruf an. * |
+| Broadcast | `HANG_UP` | – | Lehnt den klingelnden Anruf ab oder legt auf. * |
+| Broadcast | `SPEAKER` | `state`: `on`, `off`, `toggle` (Standard) | Lautsprecher an oder aus. * |
+| Broadcast | `LOUDER` | – | Gespräch eine Stufe lauter. * |
+| Broadcast | `LOCK` | `pin` (4–8 Ziffern) | Sperrt mit dieser PIN. Nur ohne SeniorLauncher (dann die Startseite sperren) und nur, wenn nicht schon gesperrt. |
+| Broadcast | `UNLOCK` | `pin` | Entsperrt mit der PIN oder der Reset-PIN; auch die Sperre der Startseite. |
+| Broadcast | `SET_THEME` | `theme`: `light`, `dark`, `high_contrast`, `colourful` | Ändert die Farben. |
+
+\* Nur von Apps, die Anrufe annehmen dürfen (`ANSWER_PHONE_CALLS`). Ohne
+Anruf passiert nichts. Ein Name passt, wenn er der Name des Kontakts ist
+(Groß-/Kleinschreibung und Akzente egal) oder Teil des Namens von genau einem
+Kontakt.
+
+Beispiel (Trigly, Aktion „Intent senden“): Sendeart **Broadcast**, Paket
+`app.phueber.seniorphone`, Aktion `app.phueber.seniorphone.action.SET_THEME`,
+Extra `theme` = `dark` – z. B. bei Sonnenuntergang.
 
 ## Contributing
 

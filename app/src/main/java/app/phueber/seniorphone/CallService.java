@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -312,6 +313,39 @@ public final class CallService extends InCallService {
             Entry e = byKey(key);
             if (e != null && CallState.isRinging(e.state())) e.call.answer(VideoProfile.STATE_AUDIO_ONLY);
         } catch (Throwable t) { Log.e(TAG, "answer", t); }
+    }
+
+    /** Answers the newest ringing call, if there is one (automation's ANSWER). */
+    static void answerRinging() {
+        try {
+            int r = CallState.newestRinging(states(), orders());
+            if (r >= 0) answer(entries.get(r).key);
+        } catch (Throwable t) { Log.e(TAG, "answerRinging", t); }
+    }
+
+    /** Ends the call the screen shows: declines it while ringing, hangs up otherwise. */
+    static void endShown() {
+        Entry e = primary();
+        if (e != null) decline(e.key);
+    }
+
+    /**
+     * One step up on the call volume, with the system's volume bar as
+     * feedback; false if it is already at the top (the caller may say so).
+     */
+    static boolean louder(Context ctx) {
+        try {
+            AudioManager am = ctx.getSystemService(AudioManager.class);
+            if (am == null) return true;
+            int now = am.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+            int max = am.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL);
+            if (now >= max) return false;
+            am.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE,
+                    AudioManager.FLAG_SHOW_UI);
+        } catch (Throwable t) {
+            Log.w(TAG, "louder", t);
+        }
+        return true;
     }
 
     private static final long REBIND_WAIT_MS = 3000;

@@ -37,6 +37,8 @@ import android.widget.TextView;
  */
 public final class DialActivity extends Activity {
     private static final String STATE_NUMBER = "number";
+    /** Automation's CALL for a number nobody in the address book has: ask "Call 0171…?" (boolean). */
+    static final String EXTRA_ASK_CALL = "ask_call";
     private static final int KEY_MIN_HEIGHT = 80;
     private static final int DIGIT_SP = 52;
     /** Pad rows keep this height instead of stretching over the whole screen. */
@@ -46,17 +48,20 @@ public final class DialActivity extends Activity {
     private static final String KEYS = "123456789*0#";
 
     private Palette.Theme theme;
+    private Store store;
     private String number = "";
     private TextView display;
     private Button delete;
     private Button call;
     private ToneGenerator tones;
     private android.app.Dialog roleDialog;
+    private android.app.Dialog callDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         theme = Ui.applyTheme(this);
+        store = new Store(this);
         number = savedInstanceState != null
                 ? DialNumber.clean(savedInstanceState.getString(STATE_NUMBER, ""))
                 : fromIntent(getIntent());
@@ -69,12 +74,25 @@ public final class DialActivity extends Activity {
                 && (in.getAction() == null || Intent.ACTION_MAIN.equals(in.getAction()))) {
             roleDialog = Role.askIfNeeded(this);
         }
+        if (savedInstanceState == null) askRequestedCall(in);
+    }
+
+    /** Automation asked to call the number it typed in: the question, never the call itself. */
+    private void askRequestedCall(Intent in) {
+        if (in == null || !in.getBooleanExtra(EXTRA_ASK_CALL, false)) return;
+        in.removeExtra(EXTRA_ASK_CALL);
+        if (!DialNumber.canCall(number)) return;
+        if (callDialog != null && callDialog.isShowing()) callDialog.dismiss();
+        String n = number;
+        callDialog = Ui.confirm(this, getString(R.string.contacts_call_question, n),
+                getString(R.string.call), R.color.green, () -> Calls.place(this, n));
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Role.dismiss(this, roleDialog);
+        if (callDialog != null && callDialog.isShowing()) callDialog.dismiss();
     }
 
     @Override
@@ -86,6 +104,7 @@ public final class DialActivity extends Activity {
             number = n;
             update();
         }
+        askRequestedCall(intent);
     }
 
     @Override
@@ -97,7 +116,7 @@ public final class DialActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (new Store(this).theme() != theme) {
+        if (store.theme() != theme) {
             recreate(); // the helper changed the colours meanwhile
             return;
         }
@@ -110,6 +129,24 @@ public final class DialActivity extends Activity {
             }
         }
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        store.listen(storeListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        store.unlisten(storeListener);
+    }
+
+    /** The colours changed while we are open (automation): show them at once. */
+    private final android.content.SharedPreferences.OnSharedPreferenceChangeListener storeListener =
+            (prefs, key) -> {
+                if (store.theme() != theme) recreate();
+            };
 
     @Override
     protected void onPause() {
