@@ -60,6 +60,15 @@ final class ContactForm {
     }
 
     /**
+     * Whether the cleaned name parts differ from the stored ones. Either side
+     * may be null (no last name, or a cleared first name), so no equals() on it.
+     */
+    static boolean nameChanged(String given, String family, String oldFirst, String oldLast) {
+        return !java.util.Objects.equals(given, cleanName(oldFirst))
+                || !java.util.Objects.equals(family, cleanName(oldLast));
+    }
+
+    /**
      * What makes two numbers "the same" on a contact page: only "+" and digits
      * count, so "0170 123 45" and "0170/12345" are one number. A contact synced
      * from two accounts often carries each number twice; the page shows it once.

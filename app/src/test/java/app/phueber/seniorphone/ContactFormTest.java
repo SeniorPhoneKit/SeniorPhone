@@ -53,4 +53,15 @@ public class ContactFormTest {
         assertEquals("+4917012345", ContactForm.numberKey("+49 (170) 123-45"));
         assertEquals("", ContactForm.numberKey(null));
     }
+
+    @Test
+    public void nameChangeWithMissingParts() {
+        // No last name, before and after: no NullPointerException, no change.
+        assertFalse(ContactForm.nameChanged("Anna", null, " Anna ", null));
+        assertFalse(ContactForm.nameChanged("Anna", null, "Anna", "  "));
+        assertTrue(ContactForm.nameChanged("Anna", "Huber", "Anna", null));
+        // First name cleared.
+        assertTrue(ContactForm.nameChanged(null, "Huber", "Anna", "Huber"));
+        assertFalse(ContactForm.nameChanged(null, "Huber", null, "Huber"));
+    }
 }

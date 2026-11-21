@@ -310,8 +310,7 @@ final class Contacts {
                         .withValue(StructuredName.FAMILY_NAME, family)
                         .build());
             }
-            if (d.nameDataId >= 0 && !given.equals(ContactForm.cleanName(d.first))
-                    || d.nameDataId >= 0 && !family.equals(ContactForm.cleanName(d.last))) {
+            if (d.nameDataId >= 0 && ContactForm.nameChanged(given, family, d.first, d.last)) {
                 // The same person from another account has its own name row, and the
                 // provider may pick that one as the display name: change those too.
                 for (long sibling : siblingRows(cr, d.contactId, StructuredName.CONTENT_ITEM_TYPE,
