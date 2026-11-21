@@ -26,7 +26,12 @@ import java.util.Locale;
  */
 final class NavBar {
     static final String PACKAGE = "app.phueber.seniornav";
-    static final Uri STATE = Uri.parse("content://app.phueber.seniornav.bar/state");
+    static final String AUTHORITY = "app.phueber.seniornav.bar";
+
+    /** Not a static field: Uri.parse would break the pure JVM test of listed(). */
+    private static Uri state() {
+        return Uri.parse("content://" + AUTHORITY + "/state");
+    }
 
     private NavBar() {}
 
@@ -56,9 +61,9 @@ final class NavBar {
      */
     private static Boolean visible(Context c) {
         try {
-            ProviderInfo p = c.getPackageManager().resolveContentProvider(STATE.getAuthority(), 0);
+            ProviderInfo p = c.getPackageManager().resolveContentProvider(AUTHORITY, 0);
             if (p == null || !PACKAGE.equals(p.packageName)) return null;
-            try (Cursor cur = c.getContentResolver().query(STATE, new String[] { "visible" }, null, null, null)) {
+            try (Cursor cur = c.getContentResolver().query(state(), new String[] { "visible" }, null, null, null)) {
                 if (cur == null || !cur.moveToFirst()) return null;
                 int i = cur.getColumnIndex("visible");
                 return i < 0 || cur.isNull(i) ? null : cur.getInt(i) != 0;
@@ -87,7 +92,7 @@ final class NavBar {
         back.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override public void onViewAttachedToWindow(View v) {
                 try {
-                    v.getContext().getContentResolver().registerContentObserver(STATE, false, observer);
+                    v.getContext().getContentResolver().registerContentObserver(state(), false, observer);
                 } catch (RuntimeException ignored) {
                     // no SeniorNav provider: the focus check above remains
                 }
