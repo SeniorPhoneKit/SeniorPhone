@@ -720,16 +720,46 @@ public final class CallActivity extends Activity implements CallService.Listener
         l.setTextColor(fg);
         l.setGravity(Gravity.CENTER);
         l.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        texts.addView(l);
+        texts.addView(l, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        fitOneLine(l, textSp);
         if (sub != null) {
             TextView s = Ui.text(this, sub, textSp - 2);
             s.setTextColor(fg);
             s.setGravity(Gravity.CENTER);
             s.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            texts.addView(s);
+            texts.addView(s, new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            fitOneLine(s, textSp - 2);
         }
-        b.addView(texts);
+        // The words take the width the icon leaves, so they can be fitted to it.
+        b.addView(texts, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         return b;
+    }
+
+    /**
+     * Keeps a button word on one line: shrinks it (down to 16sp) until it fits the
+     * width it got, instead of breaking it in the middle ("Micropho-ne") and
+     * pushing the line below out of the button.
+     */
+    private static void fitOneLine(TextView t, int maxSp) {
+        t.setMaxLines(1);
+        t.addOnLayoutChangeListener((v, l, top, r, bottom, ol, ot, or, ob) -> {
+            int avail = t.getWidth() - t.getPaddingLeft() - t.getPaddingRight();
+            if (avail <= 0) return;
+            float sp = maxSp;
+            android.text.TextPaint p = new android.text.TextPaint(t.getPaint());
+            float scale = t.getResources().getDisplayMetrics().scaledDensity;
+            p.setTextSize(sp * scale);
+            while (sp > 16 && p.measureText(t.getText().toString()) > avail) {
+                sp -= 1;
+                p.setTextSize(sp * scale);
+            }
+            if (Math.abs(t.getTextSize() - sp * scale) > 0.5f) {
+                final float fit = sp;
+                t.post(() -> t.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, fit));
+            }
+        });
     }
 
     /** Answer/Decline: one choice at a time, until the call reacts. */
