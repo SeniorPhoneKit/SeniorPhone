@@ -60,6 +60,7 @@ public final class DialActivity extends Activity {
     private ToneGenerator tones;
     private android.app.Dialog roleDialog;
     private android.app.Dialog callDialog;
+    private CallBanner callBanner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +88,7 @@ public final class DialActivity extends Activity {
         in.removeExtra(EXTRA_ASK_CALL);
         if (!DialNumber.canCall(number)) return;
         if (callDialog != null && callDialog.isShowing()) callDialog.dismiss();
+        if (Calls.busy(this)) return;
         String n = number;
         callDialog = Ui.confirm(this, getString(R.string.contacts_call_question, n),
                 getString(R.string.call), R.color.green, () -> Calls.place(this, n));
@@ -140,12 +142,14 @@ public final class DialActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        callBanner.start();
         store.listen(storeListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        callBanner.stop();
         store.unlisten(storeListener);
     }
 
@@ -214,6 +218,18 @@ public final class DialActivity extends Activity {
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
         page.setFitsSystemWindows(true);
+
+        // While a call is on, the way back to it, and a number typed before the
+        // call is not left for a second Call by mistake: it is cleared when a
+        // call starts or ends.
+        callBanner = new CallBanner(this, () -> {
+            number = "";
+            update();
+        });
+        LinearLayout.LayoutParams cblp = Ui.fullWidth(this, 12);
+        cblp.setMarginStart(p);
+        cblp.setMarginEnd(p);
+        page.addView(callBanner.view, cblp);
 
         // Only Delete sits on top, at the end. The number goes in the middle, in
         // the spare room between Delete and the pad, where it is easy to read.

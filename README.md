@@ -25,6 +25,9 @@ number pad, **Contacts** (blue address book) opens the contact list.
 - **During a call**: who you are talking to, how long, a big red **Hang up**,
   **Speaker**, **Louder**, **Microphone** (on or off, said in words) and
   **Keypad**, a big pad for the menus of a hotline ("press 1 for …").
+  Left the call screen? Contacts, the number pad and a person's page show a
+  green **Back to the call**, and nobody else is called by mistake while the
+  call is on.
 
 ## Install
 
@@ -122,7 +125,10 @@ Tastenfeld, **Kontakte** (blaues Adressbuch) öffnet die Kontaktliste.
 - **Während eines Gesprächs**: mit wem Sie sprechen, wie lange, ein großes rotes
   **Auflegen**, **Lautsprecher**, **Lauter**, **Mikrofon** (an oder aus, in
   Worten) und **Tastatur**, ein großes Tastenfeld für Sprachmenüs einer
-  Hotline („drücken Sie die 1 für …“).
+  Hotline („drücken Sie die 1 für …“). Den Anrufbildschirm verlassen?
+  Kontakte, Tastenfeld und die Seite einer Person zeigen ein grünes
+  **Zurück zum Anruf**, und während des Gesprächs wird niemand sonst
+  versehentlich angerufen.
 
 ### Installieren
 

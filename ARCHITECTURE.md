@@ -29,7 +29,8 @@ colour theme (`Store`).
 | `DialActivity` | The number pad; also what other apps open for "dial this number". |
 | `DialMatch` | Pure: whose number is being typed. Same number (same digits, or national vs. country-code form, `Automation.sameNumber`) gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
 | `DialNumber` | Pure: what may be typed and how a number from another app is cleaned. Unit tested. |
-| `Calls` | `place()`: places a call through Telecom, asking for the call permission if needed. |
+| `Calls` | `place()`: places a call through Telecom, asking for the call permission if needed; refused (a call is already on: `busy()`) or failed, it says so. |
+| `CallBanner` | The green "Back to the call" on the list, the pad and a contact page; follows `CallService` while the screen is started. |
 | `CallService` | The `InCallService` Telecom binds while there is a call. The only owner of call state; answer, decline, hang up, speaker, mute, keypad tones (DTMF). |
 | `CallActivity` | The call screen: incoming (Answer / Decline), calling and connected (Hang up, Speaker, Louder, Microphone, Keypad), ended. Over the lock screen. The keypad (also opened by Telecom's `onBringToForeground(showDialpad)`) is a big 0–9 * # pad in the number pad's look (`DialActivity.keyView`) that sends `playDtmfTone`/`stopDtmfTone` and shows the typed digits; Hang up keeps its size and place. |
 | `CallNotifier` | The incoming-call notification (full screen, Answer / Decline) and the ongoing one (Hang up). |
@@ -79,8 +80,13 @@ This is the part that must never fail.
   was there before never lands on Hang up. Calling and connected have the
   same buttons in the same places, so the other side answering does not
   restart that pause.
-- Back does nothing during a call (with the keypad open it closes the keypad). While a call is on, the contact list shows
-  a green "Back to the call".
+- Back does nothing during a call (with the keypad open it closes the keypad). While a call is on, the contact list,
+  the number pad and a contact page show a green "Back to the call"
+  (`CallBanner`, following `CallService` while the screen is started, so it
+  comes and goes with the call). Call, "Call X?" and automation's question
+  then say "You are already on a call" with "Back to the call" instead of
+  starting a second call (`Calls.busy`), and the pad clears a number typed
+  before the call when a call starts or ends.
 - Direct boot: `CallService`, `CallActivity` and `CallActionReceiver` are
   `directBootAware`, so our screen (not the stock dialer's) shows a call
   that comes in before the first unlock after a restart. Everything they

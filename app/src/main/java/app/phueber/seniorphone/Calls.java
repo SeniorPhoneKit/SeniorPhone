@@ -35,6 +35,7 @@ public final class Calls {
     public static void place(Activity a, String number) {
         try {
             if (number == null || number.trim().isEmpty()) return;
+            if (busy(a)) return;
             String n = number.trim();
             if (a.checkSelfPermission(Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                 pendingNumber = n;
@@ -84,6 +85,22 @@ public final class Calls {
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             place(a, n);
         }
+    }
+
+    /**
+     * While a call is on, a second one is not started by mistake (a number left
+     * on the pad, a widget tapped during the call): says so, with "Back to the
+     * call", and returns true. False when no call is on.
+     */
+    static boolean busy(Activity a) {
+        if (!CallService.hasLiveCall()) return false;
+        try {
+            Ui.confirm(a, a.getString(R.string.call_already_on), a.getString(R.string.contacts_back_to_call),
+                    R.color.green, () -> CallActivity.open(a));
+        } catch (Throwable t) {
+            Log.w(TAG, "busy question", t);
+        }
+        return true;
     }
 
     private static void failed(Activity a) {

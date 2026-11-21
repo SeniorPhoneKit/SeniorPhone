@@ -71,7 +71,7 @@ public final class ContactsActivity extends Activity {
     /** Not Role.REQUEST_CODE (7301), which shares this activity. */
     private static final int REQUEST_CONTACTS = 7401;
     private static final int REQUEST_NOTIFICATIONS = 7403;
-    private Button callBanner;
+    private CallBanner callBanner;
     /** A sync changes many rows in a burst; reload once it has settled. */
     private static final long RELOAD_DELAY_MS = 400;
     private static final String STATE_ASKED = "asked_permission";
@@ -156,6 +156,7 @@ public final class ContactsActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        callBanner.start();
         observe();
         PhoneWidgets.watch(this); // keeps placed widgets in step while the app runs
         // The helper may lock or unlock the home screen while we are open
@@ -198,13 +199,13 @@ public final class ContactsActivity extends Activity {
             locked = nowLocked;
             renderLock();
         }
-        callBanner.setVisibility(CallService.hasLiveCall() ? View.VISIBLE : View.GONE);
         showContent();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        callBanner.stop();
         if (observer != null) {
             getContentResolver().unregisterContentObserver(observer);
             observer = null;
@@ -270,10 +271,8 @@ public final class ContactsActivity extends Activity {
 
         // While a call is on (the senior pressed Home during it), the way back is
         // right on top: notifications may be off, and then this is the only one.
-        callBanner = Ui.button(this, getString(R.string.contacts_back_to_call), R.color.green);
-        callBanner.setOnClickListener(v -> CallActivity.open(this));
-        callBanner.setVisibility(View.GONE);
-        page.addView(callBanner, Ui.fullWidth(this, 0));
+        callBanner = new CallBanner(this, null);
+        page.addView(callBanner.view, Ui.fullWidth(this, 0));
 
         helperBar = new LinearLayout(this);
         helperBar.setOrientation(LinearLayout.HORIZONTAL);

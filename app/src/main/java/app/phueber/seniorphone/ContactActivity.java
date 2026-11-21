@@ -49,6 +49,7 @@ public final class ContactActivity extends Activity {
     private LinearLayout content;
     private ContactInfo contact;
     private Dialog dialog;
+    private CallBanner callBanner;
     /** Counts loads, so a slow older load cannot replace a newer result. */
     private int generation;
 
@@ -66,6 +67,12 @@ public final class ContactActivity extends Activity {
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
         page.setPadding(p, Ui.dp(this, 8), p, 0);
+
+        // A widget tapped during a call lands here: the way back to the call first.
+        callBanner = new CallBanner(this, null);
+        LinearLayout.LayoutParams cblp = Ui.fullWidth(this, 0);
+        cblp.bottomMargin = Ui.dp(this, 8);
+        page.addView(callBanner.view, cblp);
 
         topBar = new LinearLayout(this);
         topBar.setOrientation(LinearLayout.HORIZONTAL);
@@ -110,6 +117,7 @@ public final class ContactActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        callBanner.start();
         // The helper may lock the home screen while this page stays visible (split screen).
         try {
             getContentResolver().registerContentObserver(LauncherLock.STATE, false, lockObserver);
@@ -136,6 +144,7 @@ public final class ContactActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
+        callBanner.stop();
         getContentResolver().unregisterContentObserver(lockObserver);
         store.unlisten(storeListener);
         dismissDialog();
@@ -318,6 +327,7 @@ public final class ContactActivity extends Activity {
 
     private void askCall(String name, String type, String number) {
         dismissDialog();
+        if (Calls.busy(this)) return;
         String question = type == null ? getString(R.string.contacts_call_question, name)
                 : getString(R.string.contacts_call_question_type, name, type);
         dialog = Ui.confirm(this, question, getString(R.string.call), R.color.green,

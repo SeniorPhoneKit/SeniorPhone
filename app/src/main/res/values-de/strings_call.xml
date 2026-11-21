@@ -40,4 +40,5 @@
     <string name="call_ended_failed">Der Anruf kam nicht zustande</string>
     <string name="call_not_allowed">Anrufe sind für diese App nicht erlaubt. Sie können dies in den Einstellungen des Telefons erlauben.</string>
     <string name="call_failed_to_start">Der Anruf konnte nicht gestartet werden.</string>
+    <string name="call_already_on">Sie telefonieren gerade. Beenden Sie zuerst das Gespräch, dann rufen Sie erneut an.</string>
 </resources>
