@@ -32,8 +32,10 @@ import java.util.List;
 
 /**
  * The call screen: incoming (Answer / Decline), calling and talking (Hang up,
- * Speaker, Louder), on hold (Continue / Hang up), SIM choice, and a short
- * "Call ended". Works over the lock screen and turns the screen on.
+ * Speaker, Louder, Microphone, Keypad), on hold (Continue / Hang up), SIM
+ * choice, and a short "Call ended". The keypad (hotline menus, PINs) replaces
+ * the talking screen's middle with a big 0-9 * # pad; Hang up stays big in
+ * the same place at the bottom. Works over the lock screen and turns the screen on.
  *
  * It holds no call state of its own: every render reads CallService, so it
  * can be destroyed and recreated at any time while the call goes on, and it
@@ -53,6 +55,10 @@ public final class CallActivity extends Activity implements CallService.Listener
     private static final String TAG = "CallActivity";
     static final String EXTRA_KEY = "call_key";
     static final String ACTION_ANSWER = "app.phueber.seniorphone.CALL_ANSWER";
+    /** Open with the keypad showing (Telecom's onBringToForeground(showDialpad)). */
+    static final String EXTRA_SHOW_KEYPAD = "show_keypad";
+    /** A keypad tap sends its tone this long. */
+    private static final long DTMF_MS = 200;
     /** Taps are ignored this long after a new screen appears. */
     private static final long TOUCH_GUARD_MS = 700;
     /** After Answer/Decline, both are ignored this long unless the call changes. */
@@ -75,6 +81,11 @@ public final class CallActivity extends Activity implements CallService.Listener
     private long guardUntil;
     private long choiceLockedUntil;
     private boolean endedShowing;
+    /** The keypad is showing instead of the talking screen's middle. */
+    private boolean keypadOpen;
+    /** What was typed on the keypad during this call, shown above it. */
+    private String typed = "";
+    private TextView typedView;
     private Object backCallback;
 
     private final Runnable tick = new Runnable() {
@@ -196,7 +207,18 @@ public final class CallActivity extends Activity implements CallService.Listener
     }
 
     private void onBack() {
-        if (endedShowing) close();
+        if (endedShowing) {
+            close();
+        } else if (keypadOpen) {
+            showKeypad(false);
+        }
+    }
+
+    /** Opens or closes the keypad; taps on the new layout wait a moment, as on any new screen. */
+    private void showKeypad(boolean open) {
+        keypadOpen = open;
+        guardUntil = SystemClock.uptimeMillis() + TOUCH_GUARD_MS;
+        render();
     }
 
     @android.annotation.TargetApi(33)
@@ -225,6 +247,11 @@ public final class CallActivity extends Activity implements CallService.Listener
 
     /** Answer from the notification's button arrives here. */
     private void handleIntent(Intent intent) {
+        if (intent != null && intent.getBooleanExtra(EXTRA_SHOW_KEYPAD, false)) {
+            intent.removeExtra(EXTRA_SHOW_KEYPAD);
+            keypadOpen = true;
+            guardUntil = SystemClock.uptimeMillis() + TOUCH_GUARD_MS;
+        }
         if (intent == null || !ACTION_ANSWER.equals(intent.getAction())) return;
         CallService.answer(intent.getIntExtra(EXTRA_KEY, 0));
         // Done; a later re-delivery of this intent must not answer again.
@@ -245,8 +272,17 @@ public final class CallActivity extends Activity implements CallService.Listener
             handler.removeCallbacks(close);
             endedShowing = false;
             CallState.Screen s = p.screen();
+            if (shownKey != 0 && p.key != shownKey) {
+                // Another call took the screen: its own keypad, closed.
+                keypadOpen = false;
+                typed = "";
+            }
             if (p.key != shownKey || s != shownScreen) {
-                guardUntil = SystemClock.uptimeMillis() + TOUCH_GUARD_MS;
+                // Calling -> connected keeps every button where it was (Hang up
+                // included), so a tap then is meant for that button: no guard.
+                if (!(p.key == shownKey && sameButtons(shownScreen, s))) {
+                    guardUntil = SystemClock.uptimeMillis() + TOUCH_GUARD_MS;
+                }
                 choiceLockedUntil = 0;
             }
             String sig = signature(p, s);
@@ -277,6 +313,15 @@ public final class CallActivity extends Activity implements CallService.Listener
         }
     }
 
+    /** Screens with the same buttons in the same places. */
+    private static boolean sameButtons(CallState.Screen a, CallState.Screen b) {
+        return talking(a) && talking(b);
+    }
+
+    private static boolean talking(CallState.Screen s) {
+        return s == CallState.Screen.OUTGOING || s == CallState.Screen.ACTIVE;
+    }
+
     private void close() {
         handler.removeCallbacksAndMessages(null);
         if (!isFinishing()) finishAndRemoveTask();
@@ -286,13 +331,20 @@ public final class CallActivity extends Activity implements CallService.Listener
     private String signature(CallService.Entry p, CallState.Screen s) {
         return p.key + "|" + s + "|" + p.title() + "|" + p.formatted() + "|"
                 + (p.photo != null ? System.identityHashCode(p.photo) : 0) + "|"
-                + speakerOn() + "|" + CallService.hasOtherLiveCall(p);
+                + speakerOn() + "|" + CallService.muted() + "|" + keypadOpen + "|"
+                + CallService.hasOtherLiveCall(p);
     }
 
     private void build(CallService.Entry p, CallState.Screen s) {
         LinearLayout root = column();
         boolean small = getResources().getConfiguration().screenHeightDp < 640;
-        int avatar = s == CallState.Screen.INCOMING ? (small ? 88 : 128) : (small ? 72 : 96);
+        typedView = null;
+        if (keypadOpen && talking(s)) {
+            buildKeypad(root, p, small);
+            show(root);
+            return;
+        }
+        int avatar = s == CallState.Screen.INCOMING ? (small ? 88 : 128) : (small ? 56 : 96);
         root.addView(header(p.title(), p.contactName, p.formatted(), p.photo,
                         p.contactId >= 0 ? p.contactId : (p.number != null ? p.number.hashCode() : 0), avatar),
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
@@ -322,7 +374,10 @@ public final class CallActivity extends Activity implements CallService.Listener
             }
             case OUTGOING:
             case ACTIVE: {
-                root.addView(audioRow(), sized(96, 16));
+                // The same rows while calling and when connected: nothing moves
+                // when the other side answers.
+                root.addView(audioRow(), sized(small ? 80 : 96, 16));
+                root.addView(micKeypadRow(), sized(small ? 80 : 96, 16));
                 root.addView(hangUp(key), sized(small ? 96 : 112, 32));
                 break;
             }
@@ -359,6 +414,76 @@ public final class CallActivity extends Activity implements CallService.Listener
                 break;
         }
         show(root);
+    }
+
+    /**
+     * The keypad: who and how long on top, then what was typed, the twelve
+     * keys (the number pad's look), "Close keypad", and Hang up exactly where
+     * it is on the talking screen.
+     */
+    private void buildKeypad(LinearLayout root, CallService.Entry p, boolean small) {
+        final int key = p.key;
+        String title = p.title() != null ? p.title() : getString(R.string.call_unknown_number);
+        TextView name = Ui.bold(this, title, 28);
+        name.setGravity(Gravity.CENTER);
+        name.setSingleLine(true);
+        name.setEllipsize(TextUtils.TruncateAt.END);
+        root.addView(name, Ui.fullWidth(this, 0));
+        status = Ui.text(this, "", 22);
+        status.setGravity(Gravity.CENTER);
+        root.addView(status, Ui.fullWidth(this, 0));
+
+        typedView = Ui.bold(this, "", 40);
+        typedView.setGravity(Gravity.CENTER);
+        typedView.setSingleLine(true);
+        typedView.setEllipsize(TextUtils.TruncateAt.START); // the newest digits stay in sight
+        typedView.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        showTyped();
+        root.addView(typedView, Ui.fullWidth(this, 4));
+
+        LinearLayout pad = new LinearLayout(this);
+        pad.setOrientation(LinearLayout.VERTICAL);
+        String keys = "123456789*0#";
+        for (int row = 0; row < 4; row++) {
+            LinearLayout r = new LinearLayout(this);
+            r.setOrientation(LinearLayout.HORIZONTAL);
+            for (int col = 0; col < 3; col++) {
+                char c = keys.charAt(row * 3 + col);
+                FrameLayout k = DialActivity.keyView(this, c, small ? 36 : 44);
+                k.setOnClickListener(v -> {
+                    if (SystemClock.uptimeMillis() < guardUntil) return;
+                    v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
+                    CallService.playDtmf(key, c);
+                    handler.postDelayed(() -> CallService.stopDtmf(key), DTMF_MS);
+                    typed = typed + c;
+                    showTyped();
+                });
+                LinearLayout.LayoutParams klp = new LinearLayout.LayoutParams(
+                        0, ViewGroup.LayoutParams.MATCH_PARENT, 1);
+                int m = Ui.dp(this, 4);
+                klp.setMargins(m, m, m, m);
+                r.addView(k, klp);
+            }
+            pad.addView(r, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        }
+        LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1);
+        plp.topMargin = Ui.dp(this, 8);
+        root.addView(pad, plp);
+
+        View hide = action(R.drawable.ic_contacts_dialpad, getString(R.string.call_keypad_close), null,
+                R.color.blue, false, 24, () -> showKeypad(false));
+        root.addView(hide, sized(small ? 72 : 80, 12));
+        root.addView(hangUp(key), sized(small ? 96 : 112, 32));
+    }
+
+    private void showTyped() {
+        if (typedView == null) return;
+        typedView.setText(typed);
+        typedView.setContentDescription(typed.isEmpty() ? getString(R.string.call_keypad_hint)
+                : DialNumber.spoken(typed, getString(R.string.dial_plus),
+                        getString(R.string.dial_star), getString(R.string.dial_hash)));
+        if (typed.isEmpty()) typedView.setHint(R.string.call_keypad_hint);
+        typedView.setHintTextColor(Ui.color(this, R.color.text_muted));
     }
 
     private void buildEnded(String title, CallState.End end) {
@@ -513,6 +638,29 @@ public final class CallActivity extends Activity implements CallService.Listener
         LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1);
         rp.setMarginStart(Ui.dp(this, 12));
         row.addView(louder, rp);
+        return row;
+    }
+
+    /**
+     * Microphone (said in words: "is on" / "is off – they can't hear you"),
+     * filled while muted so it stands out, and Keypad.
+     */
+    private View micKeypadRow() {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        boolean muted = CallService.muted();
+        View mic = action(muted ? R.drawable.ic_call_mic_off : R.drawable.ic_call_mic,
+                getString(R.string.call_microphone),
+                getString(muted ? R.string.call_microphone_off : R.string.call_microphone_on),
+                R.color.blue, muted, 24, () -> CallService.setMicrophoneMuted(!CallService.muted()));
+        if (muted) mic.setContentDescription(getString(R.string.call_microphone_off_cd));
+        View keypad = action(R.drawable.ic_contacts_dialpad, getString(R.string.call_keypad), null,
+                R.color.blue, false, 24, () -> showKeypad(true));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1);
+        row.addView(mic, lp);
+        LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1);
+        rp.setMarginStart(Ui.dp(this, 12));
+        row.addView(keypad, rp);
         return row;
     }
 

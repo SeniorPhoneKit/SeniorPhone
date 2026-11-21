@@ -30,8 +30,8 @@ colour theme (`Store`).
 | `DialMatch` | Pure: whose number is being typed. Same digits or same last nine digits gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
 | `DialNumber` | Pure: what may be typed and how a number from another app is cleaned. Unit tested. |
 | `Calls` | `place()`: places a call through Telecom, asking for the call permission if needed. |
-| `CallService` | The `InCallService` Telecom binds while there is a call. The only owner of call state; answer, decline, hang up, speaker. |
-| `CallActivity` | The call screen: incoming (Answer / Decline), calling and connected (Hang up, Speaker, Louder), ended. Over the lock screen. |
+| `CallService` | The `InCallService` Telecom binds while there is a call. The only owner of call state; answer, decline, hang up, speaker, mute, keypad tones (DTMF). |
+| `CallActivity` | The call screen: incoming (Answer / Decline), calling and connected (Hang up, Speaker, Louder, Microphone, Keypad), ended. Over the lock screen. The keypad (also opened by Telecom's `onBringToForeground(showDialpad)`) is a big 0–9 * # pad in the number pad's look (`DialActivity.keyView`) that sends `playDtmfTone`/`stopDtmfTone` and shows the typed digits; Hang up keeps its size and place. |
 | `CallNotifier` | The incoming-call notification (full screen, Answer / Decline) and the ongoing one (Hang up). |
 | `CallActionReceiver` | Decline and Hang up from the notifications. After a process restart (Telecom has not bound the call service in this process yet), a tap is kept for 3 s and applied when the call arrives; otherwise a tap that finds no call only removes the notification, so it can never end the next call. |
 | `CallState` | Pure: Telecom states to screens, which call gets the screen (never a conference participant: the conference call does, so Hang up ends all of it), why a call ended, the timer text. Unit tested. |
@@ -76,8 +76,10 @@ This is the part that must never fail.
 - Answer is huge and on top, Decline smaller and below: declining by mistake
   is worse than answering by mistake, and stacked buttons cannot be hit by a
   sideways slip. New screens ignore taps for 0.7 s, so a tap meant for what
-  was there before never lands on Hang up.
-- Back does nothing during a call. While a call is on, the contact list shows
+  was there before never lands on Hang up. Calling and connected have the
+  same buttons in the same places, so the other side answering does not
+  restart that pause.
+- Back does nothing during a call (with the keypad open it closes the keypad). While a call is on, the contact list shows
   a green "Back to the call".
 - The proximity wake lock turns the screen off at the ear, only for earpiece
   calls, never while ringing.

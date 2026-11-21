@@ -22,7 +22,8 @@ number pad, **Contacts** (blue address book) opens the contact list.
 - **When someone calls**: their name (or number), a huge green **Answer** and,
   below it, a red **Decline**. It works on the lock screen too.
 - **During a call**: who you are talking to, how long, a big red **Hang up**,
-  **Speaker** and **Louder**.
+  **Speaker**, **Louder**, **Microphone** (on or off, said in words) and
+  **Keypad**, a big pad for the menus of a hotline ("press 1 for …").
 
 ## Install
 
@@ -117,7 +118,9 @@ Tastenfeld, **Kontakte** (blaues Adressbuch) öffnet die Kontaktliste.
 - **Wenn jemand anruft**: der Name (oder die Nummer), ein riesiges grünes
   **Annehmen** und darunter ein rotes **Ablehnen**. Auch auf dem Sperrbildschirm.
 - **Während eines Gesprächs**: mit wem Sie sprechen, wie lange, ein großes rotes
-  **Auflegen**, **Lautsprecher** und **Lauter**.
+  **Auflegen**, **Lautsprecher**, **Lauter**, **Mikrofon** (an oder aus, in
+  Worten) und **Tastatur**, ein großes Tastenfeld für Sprachmenüs einer
+  Hotline („drücken Sie die 1 für …“).
 
 ### Installieren
 

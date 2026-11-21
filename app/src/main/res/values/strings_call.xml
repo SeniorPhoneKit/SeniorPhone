@@ -24,6 +24,13 @@
     <string name="call_speaker_off">is off</string>
     <string name="call_louder">Louder</string>
     <string name="call_loudest">This is already the loudest setting.</string>
+    <string name="call_microphone">Microphone</string>
+    <string name="call_microphone_on">is on</string>
+    <string name="call_microphone_off">is off</string>
+    <string name="call_microphone_off_cd">Microphone is off: the other person cannot hear you. Tap to switch it on.</string>
+    <string name="call_keypad">Keypad</string>
+    <string name="call_keypad_close">Close keypad</string>
+    <string name="call_keypad_hint">Type numbers for the call</string>
     <string name="call_choose_sim">Which SIM card should be used?</string>
     <!-- %1$d is 1 or 2 -->
     <string name="call_sim_n">SIM %1$d</string>

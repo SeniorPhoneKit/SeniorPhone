@@ -340,20 +340,8 @@ public final class DialActivity extends Activity {
      * its top corner (hold 0 for +; TalkBack says so), out of the digit's way.
      */
     private View key(char c) {
-        android.widget.FrameLayout k = new android.widget.FrameLayout(this);
+        android.widget.FrameLayout k = keyView(this, c, DIGIT_SP);
         k.setMinimumHeight(Ui.dp(this, KEY_HEIGHT));
-        k.setBackground(Ui.ripple(this, R.color.press_dark, Ui.color(this, R.color.card),
-                Ui.color(this, R.color.card_border), 20));
-        k.setClickable(true);
-        k.setFocusable(true);
-        k.setSoundEffectsEnabled(false); // the key tone is the sound
-
-        TextView digit = Ui.bold(this, String.valueOf(c), DIGIT_SP);
-        digit.setGravity(Gravity.CENTER);
-        digit.setIncludeFontPadding(false);
-        digit.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        k.addView(digit, new android.widget.FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
         if (c == '0') {
             TextView hint = Ui.bold(this, "+", LETTERS_SP + 6);
@@ -368,10 +356,7 @@ public final class DialActivity extends Activity {
             k.addView(hint, hlp);
         }
 
-        if (c == '*') k.setContentDescription(getString(R.string.dial_star));
-        else if (c == '#') k.setContentDescription(getString(R.string.dial_hash));
-        else if (c == '0') k.setContentDescription(getString(R.string.dial_zero_description));
-        else k.setContentDescription(String.valueOf(c));
+        if (c == '0') k.setContentDescription(getString(R.string.dial_zero_description));
 
         k.setOnClickListener(v -> press(v, c));
         if (c == '0') {
@@ -382,6 +367,31 @@ public final class DialActivity extends Activity {
             });
             longPressLabel(k, getString(R.string.dial_plus));
         }
+        return k;
+    }
+
+    /**
+     * The look of a pad key, shared with the keypad on the call screen: the
+     * digit big and centred on a card. TalkBack says the digit, "star", "hash".
+     */
+    static android.widget.FrameLayout keyView(android.content.Context ctx, char c, int digitSp) {
+        android.widget.FrameLayout k = new android.widget.FrameLayout(ctx);
+        k.setBackground(Ui.ripple(ctx, R.color.press_dark, Ui.color(ctx, R.color.card),
+                Ui.color(ctx, R.color.card_border), 20));
+        k.setClickable(true);
+        k.setFocusable(true);
+        k.setSoundEffectsEnabled(false); // the key tone is the sound
+
+        TextView digit = Ui.bold(ctx, String.valueOf(c), digitSp);
+        digit.setGravity(Gravity.CENTER);
+        digit.setIncludeFontPadding(false);
+        digit.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        k.addView(digit, new android.widget.FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+
+        if (c == '*') k.setContentDescription(ctx.getString(R.string.dial_star));
+        else if (c == '#') k.setContentDescription(ctx.getString(R.string.dial_hash));
+        else k.setContentDescription(String.valueOf(c));
         return k;
     }
 

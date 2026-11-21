@@ -270,7 +270,7 @@ public final class CallService extends InCallService {
     /** The system asks to show the call screen again (e.g. its "return to call" control). */
     @Override
     public void onBringToForeground(boolean showDialpad) {
-        openScreen(this);
+        openScreen(this, showDialpad);
     }
 
     @Override
@@ -474,6 +474,41 @@ public final class CallService extends InCallService {
         } catch (Throwable t) { Log.e(TAG, "speaker", t); }
     }
 
+    /** Whether the microphone is muted for the call. */
+    @SuppressWarnings("deprecation") // CallAudioState: see audioRoute
+    static boolean muted() {
+        CallService s = instance;
+        CallAudioState a = s != null ? s.getCallAudioState() : null;
+        return a != null && a.isMuted();
+    }
+
+    static void setMicrophoneMuted(boolean mute) {
+        try {
+            CallService s = instance;
+            if (s != null) s.setMuted(mute);
+        } catch (Throwable t) { Log.e(TAG, "mute", t); }
+    }
+
+    /**
+     * Starts the tone of a key of the call keypad (menus of a hotline, a PIN);
+     * stopDtmf ends it. Only for a connected or connecting call.
+     */
+    static void playDtmf(int key, char digit) {
+        try {
+            Entry e = byKey(key);
+            if (e != null && CallState.isLive(e.state()) && !CallState.isRinging(e.state())) {
+                e.call.playDtmfTone(digit);
+            }
+        } catch (Throwable t) { Log.e(TAG, "dtmf", t); }
+    }
+
+    static void stopDtmf(int key) {
+        try {
+            Entry e = byKey(key);
+            if (e != null) e.call.stopDtmfTone();
+        } catch (Throwable t) { Log.e(TAG, "dtmf stop", t); }
+    }
+
     /** The SIM cards to offer for a call waiting in CHOOSE_SIM. */
     @SuppressWarnings("deprecation") // getParcelableArrayList(String): the typed one is API 33
     static List<PhoneAccountHandle> simChoices(Context ctx, Entry e) {
@@ -499,9 +534,16 @@ public final class CallService extends InCallService {
 
     /** Opens the call screen. From the service this is allowed in the background. */
     static void openScreen(Context ctx) {
+        openScreen(ctx, false);
+    }
+
+    /** keypad: open with the keypad showing (the system asked for the dial pad). */
+    static void openScreen(Context ctx, boolean keypad) {
         try {
-            ctx.startActivity(new Intent(ctx, CallActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_USER_ACTION));
+            Intent i = new Intent(ctx, CallActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+            if (keypad) i.putExtra(CallActivity.EXTRA_SHOW_KEYPAD, true);
+            ctx.startActivity(i);
         } catch (Throwable t) {
             // The notification's full-screen intent and its buttons remain.
             Log.w(TAG, "cannot open call screen", t);

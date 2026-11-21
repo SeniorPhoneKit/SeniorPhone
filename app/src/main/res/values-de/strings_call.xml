@@ -22,6 +22,13 @@
     <string name="call_speaker_off">ist aus</string>
     <string name="call_louder">Lauter</string>
     <string name="call_loudest">Das ist bereits die lauteste Stufe.</string>
+    <string name="call_microphone">Mikrofon</string>
+    <string name="call_microphone_on">ist an</string>
+    <string name="call_microphone_off">ist aus</string>
+    <string name="call_microphone_off_cd">Mikrofon ist aus: Ihr Gesprächspartner hört Sie nicht. Tippen zum Einschalten.</string>
+    <string name="call_keypad">Tastatur</string>
+    <string name="call_keypad_close">Tastatur schließen</string>
+    <string name="call_keypad_hint">Ziffern für das Gespräch tippen</string>
     <string name="call_choose_sim">Welche SIM-Karte soll verwendet werden?</string>
     <string name="call_sim_n">SIM %1$d</string>
     <string name="call_no_sim">Dieser Anruf ist nicht möglich: Keine SIM-Karte ist bereit.</string>
