@@ -37,6 +37,7 @@ colour theme (`Store`).
 | `Role` | Asks once per start to become the phone app; Settings shows the state. |
 | `SettingsActivity` | Lock (choose a PIN), Colours, Phone app, phone settings. |
 | `Ui`, `Palette` | Copied from SeniorLauncher: shared buttons, screens and dialogs; the four colour themes, contrast-tested. |
+| `NavBar` | Whether SeniorNav's Back & Home bar is switched on (the enabled accessibility services list it). While it is, the pinned Back button is hidden, since the bar already has Back and Home; re-checked whenever a screen gets focus. Pure part unit tested. |
 | `Store` | Own lock flag with PIN salt/hash, and theme; `locked()` is the launcher's lock or our own; `unlock(pin)` lifts both; the reset PIN (`Pin.RESET`) works for either. |
 | `LauncherLock` | Reads SeniorLauncher's lock, and lifts it with its PIN; when the launcher cannot answer, the last known value is used (while it is installed). |
 | `Pin` | PIN validation, salted hash, constant-time compare, and the fixed reset PIN. Same as SeniorAlert's. Pure. |
