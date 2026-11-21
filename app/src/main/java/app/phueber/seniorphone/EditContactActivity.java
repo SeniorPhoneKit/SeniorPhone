@@ -26,7 +26,9 @@ import android.widget.TextView;
  * e-mail, birthday, photo) is kept as it is.
  *
  * Save and Cancel are pinned below the fields, so they stay in sight above
- * the keyboard (the manifest sets adjustResize).
+ * the keyboard (the manifest sets adjustResize). While the keyboard is up,
+ * the title and Cancel step aside (Back still cancels) and the focused field
+ * is scrolled into view with its label, so it is never half behind Save.
  *
  * Not available when locked: the screen closes at once.
  */
@@ -114,6 +116,13 @@ public final class EditContactActivity extends Activity {
         page.addView(bottom, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         setContentView(page);
+        page.setOnApplyWindowInsetsListener((v, insets) -> {
+            boolean keyboard = keyboardShown(insets);
+            title.setVisibility(keyboard ? View.GONE : View.VISIBLE);
+            cancel.setVisibility(keyboard ? View.GONE : View.VISIBLE);
+            if (keyboard) v.post(() -> reveal(getCurrentFocus()));
+            return v.onApplyWindowInsets(insets); // fitsSystemWindows still pads for bars and keyboard
+        });
 
         if (isNew) {
             draft = new Contacts.Draft();
@@ -127,6 +136,20 @@ public final class EditContactActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (store.locked()) finish();
+    }
+
+    @SuppressWarnings("deprecation") // getSystemWindowInsetBottom: the only way below API 30
+    private boolean keyboardShown(android.view.WindowInsets insets) {
+        if (Build.VERSION.SDK_INT >= 30) return insets.isVisible(android.view.WindowInsets.Type.ime());
+        return insets.getSystemWindowInsetBottom() > Ui.dp(this, 120);
+    }
+
+    /** Scrolls a field, with its label above it and a little room below, into sight. */
+    private void reveal(View field) {
+        if (!(field instanceof EditText)) return;
+        android.graphics.Rect r = new android.graphics.Rect(0, -Ui.dp(this, 48),
+                field.getWidth(), field.getHeight() + Ui.dp(this, 12));
+        field.requestRectangleOnScreen(r, false);
     }
 
     /** A label above a big field; the label is tied to the field for TalkBack. */
@@ -152,6 +175,9 @@ public final class EditContactActivity extends Activity {
         bg.setCornerRadius(Ui.dp(this, 16));
         e.setBackground(bg);
         form.addView(e, Ui.fullWidth(this, 6));
+        e.setOnFocusChangeListener((v, has) -> {
+            if (has) v.post(() -> reveal(v));
+        });
         return e;
     }
 
