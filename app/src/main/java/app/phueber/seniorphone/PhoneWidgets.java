@@ -150,18 +150,18 @@ final class PhoneWidgets {
 
     /**
      * The contact page with "Call …?" (with several numbers, the page itself
-     * is the question: one Call per number). CLEAR_TOP: an open contact page
-     * is replaced, so the question is always about this person.
+     * is the question: one Call per number), over a fresh contact list
+     * (ContactActivity.overList): the question is always about this person,
+     * and Back from the page goes to the list, not to an older page.
      */
     private static Intent callIntent(Context c) {
         return new Intent(c, ContactActivity.class)
-                .putExtra(ContactActivity.EXTRA_ASK_CALL, "")
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                .putExtra(ContactActivity.EXTRA_ASK_CALL, "");
     }
 
     static PendingIntent call(Context c, int widgetId, long contactId) {
-        return PendingIntent.getActivity(c, widgetId,
-                callIntent(c).putExtra(ContactActivity.EXTRA_ID, contactId), immutable());
+        return PendingIntent.getActivities(c, widgetId, ContactActivity.overList(c,
+                callIntent(c).putExtra(ContactActivity.EXTRA_ID, contactId)), immutable());
     }
 
     /**
@@ -170,9 +170,9 @@ final class PhoneWidgets {
      * PendingIntents different and the last row would win.
      */
     static PendingIntent favourite(Context c, int widgetId, long contactId) {
-        return PendingIntent.getActivity(c, widgetId,
+        return PendingIntent.getActivities(c, widgetId, ContactActivity.overList(c,
                 callIntent(c).setAction("app.phueber.seniorphone.widget.FAVOURITE." + contactId)
-                        .putExtra(ContactActivity.EXTRA_ID, contactId), immutable());
+                        .putExtra(ContactActivity.EXTRA_ID, contactId)), immutable());
     }
 
     /** The contact list; it also asks for the contacts permission when it is missing. */

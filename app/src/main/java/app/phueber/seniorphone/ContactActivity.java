@@ -53,6 +53,18 @@ public final class ContactActivity extends Activity {
     /** Counts loads, so a slow older load cannot replace a newer result. */
     private int generation;
 
+    /**
+     * How every outside door (automation, widgets, the missed-call
+     * notification) opens a contact page: over the contact list, in a fresh
+     * task. Back from the page then goes to the list, and never to a page left
+     * over from an earlier visit. For startActivities / getActivities.
+     */
+    static Intent[] overList(android.content.Context c, Intent page) {
+        Intent list = new Intent(c, ContactsActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        return new Intent[] { list, page };
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

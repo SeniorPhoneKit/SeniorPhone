@@ -136,8 +136,11 @@ what a command may do:
   country): same digits, or one number with a country code and the other
   national, equal after the trunk 0. Never by a shared ending alone:
   +49 30 12345678 and +49 40 12345678 are different people.
-  The trampoline uses CLEAR_TOP so an open contact page or pad is replaced
-  rather than just brought to the front.
+  A contact page is opened over a fresh contact list
+  (`ContactActivity.overList`, also used by the widgets and the missed-call
+  notification), so it is always the page asked for and Back goes to the
+  list, never to a page left over from an earlier command; the pad uses
+  CLEAR_TOP so an open pad is replaced rather than just brought to the front.
 - Call control (`CallControlReceiver`, broadcast): guarded by
   `android:permission="android.permission.ANSWER_PHONE_CALLS"`, so only an
   app that may answer and end calls itself can send it. It calls the same

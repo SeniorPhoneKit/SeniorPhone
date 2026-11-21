@@ -64,11 +64,7 @@ public final class AutomationActivity extends Activity {
     /** Where a CALL or OPEN_CONTACT goes, once the contact is known (id) or not (-1). */
     private Intent target(boolean call, long id, String number, String name) {
         if (id >= 0) {
-            // CLEAR_TOP: a contact page already open in the app's task is replaced, so
-            // the page and its question are always the ones asked for. NEW_TASK alone
-            // would just bring that task to the front when its root is a contact page.
-            Intent i = new Intent(this, ContactActivity.class).putExtra(ContactActivity.EXTRA_ID, id)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            Intent i = new Intent(this, ContactActivity.class).putExtra(ContactActivity.EXTRA_ID, id);
             if (call) i.putExtra(ContactActivity.EXTRA_ASK_CALL, number != null ? number : "");
             return i;
         }
@@ -89,14 +85,22 @@ public final class AutomationActivity extends Activity {
     }
 
     private Intent contactList(String search) {
-        Intent i = new Intent(this, ContactsActivity.class);
+        // A fresh list: nothing left over from an earlier command stays under it.
+        Intent i = new Intent(this, ContactsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         if (search != null) i.putExtra(ContactsActivity.EXTRA_SEARCH, search);
         return i;
     }
 
     private void open(Intent i) {
         try {
-            startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            if (ContactActivity.class.getName().equals(i.getComponent().getClassName())) {
+                // The page over a fresh list (ContactActivity.overList): the page and its
+                // question are always the ones asked for, and Back from it goes to the
+                // list, never to a page from an earlier command.
+                startActivities(ContactActivity.overList(this, i));
+            } else {
+                startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            }
         } catch (RuntimeException e) {
             Log.w(TAG, "cannot open " + i, e);
         }
