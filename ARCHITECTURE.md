@@ -39,7 +39,7 @@ colour theme (`Store`).
 | `SettingsActivity` | Lock (choose a PIN), Colours, Phone app, phone settings. |
 | `Ui`, `Palette` | Copied from SeniorLauncher: shared buttons, screens and dialogs; the four colour themes, contrast-tested. |
 | `NavBar` | Whether SeniorNav's Back & Home bar is switched on (the enabled accessibility services list it). While it is, the pinned Back button is hidden, since the bar already has Back and Home; re-checked whenever a screen gets focus. Pure part unit tested. |
-| `Store` | Own lock flag with PIN salt/hash, and theme; `locked()` is the launcher's lock or our own; `unlock(pin)` lifts both; the reset PIN (`Pin.RESET`) works for either. |
+| `Store` | Own lock flag with PIN salt/hash, and theme, in device-protected storage (direct boot); `locked()` is the launcher's lock or our own; `unlock(pin)` lifts both; the reset PIN (`Pin.RESET`) works for either. |
 | `LauncherLock` | Reads SeniorLauncher's lock, and lifts it with its PIN; when the launcher cannot answer, the last known value is used (while it is installed). |
 | `Pin` | PIN validation, salted hash, constant-time compare, and the fixed reset PIN. Same as SeniorAlert's. Pure. |
 | `Automation` | Pure: the automation actions and extras, lenient parsing of the string extras, which contact a name means and which of its numbers a number is. Unit tested. |
@@ -81,6 +81,16 @@ This is the part that must never fail.
   restart that pause.
 - Back does nothing during a call (with the keypad open it closes the keypad). While a call is on, the contact list shows
   a green "Back to the call".
+- Direct boot: `CallService`, `CallActivity` and `CallActionReceiver` are
+  `directBootAware`, so our screen (not the stock dialer's) shows a call
+  that comes in before the first unlock after a restart. Everything they
+  read then comes from device-protected storage: `Store` (theme, also the
+  lock flag and PIN hash, a guard rail rather than a secret) lives there and
+  is moved over once, the first time the app runs unlocked. Limits: the
+  address book is unreadable before the unlock, so the caller is shown by
+  number; a call before that first move after an update uses the default
+  colours; the missed-call notification and every other screen wait for the
+  unlock.
 - The proximity wake lock turns the screen off at the ear, only for earpiece
   calls, never while ringing.
 

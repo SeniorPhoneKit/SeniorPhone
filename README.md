@@ -20,7 +20,8 @@ number pad, **Contacts** (blue address book) opens the contact list.
   "Call Maria Schmidt?" once more, so nobody is called by accident.
 - **Number pad** for numbers that are not in your contacts. While you type, it says whose number it is ("✓ Maria Schmidt"), or offers the one contact whose number starts like that; a tap fills in the rest.
 - **When someone calls**: their name (or number), a huge green **Answer** and,
-  below it, a red **Decline**. It works on the lock screen too.
+  below it, a red **Decline**. It works on the lock screen too, also right
+  after the phone was switched on (then with the number instead of the name).
 - **During a call**: who you are talking to, how long, a big red **Hang up**,
   **Speaker**, **Louder**, **Microphone** (on or off, said in words) and
   **Keypad**, a big pad for the menus of a hotline ("press 1 for …").
@@ -116,7 +117,8 @@ Tastenfeld, **Kontakte** (blaues Adressbuch) öffnet die Kontaktliste.
   Versehen angerufen wird.
 - **Tastenfeld** für Nummern, die nicht in Ihren Kontakten stehen. Beim Tippen steht darunter, wem die Nummer gehört („✓ Maria Schmidt“), oder es wird der eine Kontakt angeboten, dessen Nummer so beginnt; ein Tippen ergänzt den Rest.
 - **Wenn jemand anruft**: der Name (oder die Nummer), ein riesiges grünes
-  **Annehmen** und darunter ein rotes **Ablehnen**. Auch auf dem Sperrbildschirm.
+  **Annehmen** und darunter ein rotes **Ablehnen**. Auch auf dem Sperrbildschirm,
+  auch gleich nach dem Einschalten (dann mit der Nummer statt des Namens).
 - **Während eines Gesprächs**: mit wem Sie sprechen, wie lange, ein großes rotes
   **Auflegen**, **Lautsprecher**, **Lauter**, **Mikrofon** (an oder aus, in
   Worten) und **Tastatur**, ein großes Tastenfeld für Sprachmenüs einer

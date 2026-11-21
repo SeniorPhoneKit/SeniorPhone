@@ -102,9 +102,13 @@
             android:screenOrientation="portrait"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
 
-        <!-- Incoming and ongoing calls: full screen, over the lock screen. -->
+        <!-- Incoming and ongoing calls: full screen, over the lock screen.
+             directBootAware, like CallService and CallActionReceiver: before the
+             first unlock after a restart Telecom only binds a phone app that can
+             run then, else the stock dialer shows the call. -->
         <activity
             android:name=".CallActivity"
+            android:directBootAware="true"
             android:excludeFromRecents="true"
             android:exported="false"
             android:launchMode="singleInstance"
@@ -119,6 +123,7 @@
              so the phone rings with its normal ringtone and volume. -->
         <service
             android:name=".CallService"
+            android:directBootAware="true"
             android:exported="true"
             android:permission="android.permission.BIND_INCALL_SERVICE">
             <meta-data
@@ -131,6 +136,7 @@
 
         <receiver
             android:name=".CallActionReceiver"
+            android:directBootAware="true"
             android:exported="false" />
 
         <!-- Automation (Trigly, Tasker, ...): see Automation.java. Screens that must

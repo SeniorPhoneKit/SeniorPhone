@@ -744,6 +744,9 @@ public final class CallService extends InCallService {
         e.photo = null;
         if (number == null) return;
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) return;
+        // Before the first unlock after a restart the address book cannot be read:
+        // the number is shown. A later onDetailsChanged does not retry; fine for one call.
+        if (!Store.unlocked(this)) return;
 
         final String n = number;
         final ContentResolver cr = getContentResolver();

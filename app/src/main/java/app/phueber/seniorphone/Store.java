@@ -8,6 +8,12 @@ import android.content.SharedPreferences;
  * favourites are not stored here: they live in the phone's address book
  * (ContactsContract, "starred"), so they are the same in every app and survive
  * a reinstall.
+ *
+ * Kept in device-protected storage: the call screen runs before the first
+ * unlock after a restart (direct boot) and draws in the theme from here.
+ * Credential storage cannot be read then. The file is moved there once, the
+ * first time the app runs unlocked after this change; until then (a call
+ * before that first unlock) the call screen uses the default colours.
  */
 public final class Store {
     private static final String FILE = "seniorphone";
@@ -19,9 +25,37 @@ public final class Store {
     private final SharedPreferences prefs;
     private final Context app;
 
+    /** Whether the file was moved to device-protected storage in this process. */
+    private static boolean moved;
+
     public Store(Context context) {
         app = context.getApplicationContext();
-        prefs = app.getSharedPreferences(FILE, Context.MODE_PRIVATE);
+        prefs = open(app);
+    }
+
+    private static SharedPreferences open(Context app) {
+        Context device = app.createDeviceProtectedStorageContext();
+        synchronized (Store.class) {
+            if (!moved && unlocked(app)) {
+                try {
+                    // Returns true also when there is nothing to move (already moved).
+                    moved = device.moveSharedPreferencesFrom(app, FILE);
+                } catch (RuntimeException e) {
+                    android.util.Log.w("Store", "move to device storage", e);
+                }
+            }
+        }
+        return device.getSharedPreferences(FILE, Context.MODE_PRIVATE);
+    }
+
+    /** The phone has been unlocked since it was switched on (credential storage readable). */
+    static boolean unlocked(Context c) {
+        try {
+            android.os.UserManager um = c.getSystemService(android.os.UserManager.class);
+            return um == null || um.isUserUnlocked();
+        } catch (RuntimeException e) {
+            return true;
+        }
     }
 
     /**
