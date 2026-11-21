@@ -18,7 +18,7 @@ number pad, **Contacts** (blue address book) opens the contact list.
   letters. Search by name.
 - Tap a person: their picture, name and a big green **Call**. The phone asks
   "Call Maria Schmidt?" once more, so nobody is called by accident.
-- **Number pad** for numbers that are not in your contacts.
+- **Number pad** for numbers that are not in your contacts. While you type, it says whose number it is ("✓ Maria Schmidt"), or offers the one contact whose number starts like that; a tap fills in the rest.
 - **When someone calls**: their name (or number), a huge green **Answer** and,
   below it, a red **Decline**. It works on the lock screen too.
 - **During a call**: who you are talking to, how long, a big red **Hang up**,
@@ -111,7 +111,7 @@ Tastenfeld, **Kontakte** (blaues Adressbuch) öffnet die Kontaktliste.
 - Tippen Sie eine Person an: Bild, Name und ein großes grünes **Anrufen**. Das
   Telefon fragt noch einmal „Maria Schmidt anrufen?“, damit niemand aus
   Versehen angerufen wird.
-- **Tastenfeld** für Nummern, die nicht in Ihren Kontakten stehen.
+- **Tastenfeld** für Nummern, die nicht in Ihren Kontakten stehen. Beim Tippen steht darunter, wem die Nummer gehört („✓ Maria Schmidt“), oder es wird der eine Kontakt angeboten, dessen Nummer so beginnt; ein Tippen ergänzt den Rest.
 - **Wenn jemand anruft**: der Name (oder die Nummer), ein riesiges grünes
   **Annehmen** und darunter ein rotes **Ablehnen**. Auch auf dem Sperrbildschirm.
 - **Während eines Gesprächs**: mit wem Sie sprechen, wie lange, ein großes rotes

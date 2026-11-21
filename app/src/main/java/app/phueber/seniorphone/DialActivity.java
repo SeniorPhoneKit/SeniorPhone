@@ -51,6 +51,10 @@ public final class DialActivity extends Activity {
     private Store store;
     private String number = "";
     private TextView display;
+    /** Below the number: whose it is, or a contact whose number starts with it (DialMatch). */
+    private Button match;
+    /** The address book's numbers, loaded once in the background; empty until then or without permission. */
+    private java.util.List<DialMatch.Entry> book = new java.util.ArrayList<>();
     private Button delete;
     private Button call;
     private ToneGenerator tones;
@@ -67,6 +71,7 @@ public final class DialActivity extends Activity {
                 : fromIntent(getIntent());
         setContentView(build());
         update();
+        loadBook();
         // The Phone icon is a front door of its own, so the role question belongs here too.
         // Not over a number another app handed us (ACTION_DIAL / tel:): that would interrupt it.
         Intent in = getIntent();
@@ -282,6 +287,13 @@ public final class DialActivity extends Activity {
         nlp.setMargins(Ui.dp(this, 4), 0, Ui.dp(this, 4), Ui.dp(this, 8));
         display.setMinHeight(Ui.dp(this, KEY_MIN_HEIGHT));
         pad.addView(display, nlp);
+        match = Ui.outlined(this, "");
+        match.setVisibility(View.GONE);
+        match.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        LinearLayout.LayoutParams mlp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        mlp.setMargins(Ui.dp(this, 4), 0, Ui.dp(this, 4), Ui.dp(this, 8));
+        pad.addView(match, mlp);
         for (int row = 0; row < 4; row++) {
             LinearLayout r = new LinearLayout(this);
             r.setOrientation(LinearLayout.HORIZONTAL);
@@ -396,9 +408,68 @@ public final class DialActivity extends Activity {
         }
     }
 
+    /** Reads every contact number once, off the main thread, then refreshes the hint. */
+    private void loadBook() {
+        if (!Contacts.canRead(this)) return;
+        android.content.ContentResolver cr = getContentResolver();
+        Contacts.BACKGROUND.execute(() -> {
+            java.util.List<DialMatch.Entry> list = new java.util.ArrayList<>();
+            String[] cols = { android.provider.ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                    android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER };
+            try (android.database.Cursor c = cr.query(
+                    android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI, cols, null, null, null)) {
+                while (c != null && c.moveToNext()) {
+                    String name = c.getString(0), n = c.getString(1);
+                    if (name != null && n != null) list.add(new DialMatch.Entry(name, n));
+                }
+            } catch (RuntimeException ignored) {
+                // no hint then; the pad works as before
+            }
+            Contacts.MAIN.post(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                book = list;
+                showMatch();
+            });
+        });
+    }
+
+    /**
+     * Whose number this is ("✓ Maria Schmidt"), or, once a few digits match only
+     * one contact, "Maria Schmidt? 0171 2345678" - a tap fills in the rest.
+     */
+    private void showMatch() {
+        if (match == null) return;
+        DialMatch.Result r = DialMatch.match(book, number);
+        if (r == null) {
+            match.setVisibility(View.GONE);
+            match.setOnClickListener(null);
+            return;
+        }
+        match.setVisibility(View.VISIBLE);
+        if (r.kind == DialMatch.Kind.EXACT) {
+            // Only information, so it must not look like a button: plain green words.
+            match.setText(getString(R.string.dial_match_exact, r.entry.name));
+            match.setOnClickListener(null);
+            match.setClickable(false);
+            match.setBackground(null);
+            match.setTextColor(Ui.color(this, R.color.green));
+        } else {
+            Button fresh = Ui.outlined(this, ""); // back to the button look after an exact match
+            match.setBackground(fresh.getBackground());
+            match.setTextColor(fresh.getTextColors());
+            String full = DialNumber.clean(r.entry.number);
+            match.setText(getString(R.string.dial_match_prefix, r.entry.name, r.entry.number));
+            match.setOnClickListener(v -> {
+                number = full;
+                update();
+            });
+        }
+    }
+
     /** Shows the number; Call and Delete are greyed out while there is nothing to use. */
     private void update() {
         display.setText(number);
+        showMatch();
         display.setContentDescription(number.isEmpty() ? getString(R.string.dial_hint)
                 : DialNumber.spoken(number, getString(R.string.dial_plus),
                         getString(R.string.dial_star), getString(R.string.dial_hash)));

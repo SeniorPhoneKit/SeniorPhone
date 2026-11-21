@@ -27,6 +27,7 @@ colour theme (`Store`).
 | `Contacts` | Address-book access on one background thread (so a star or a delete always finishes before the reload after it). |
 | `ContactInfo`, `ContactList`, `ContactForm` | Pure: the contact value, sorting and sections (Ä under A, Favourites first), search key, form rules. Unit tested. |
 | `DialActivity` | The number pad; also what other apps open for "dial this number". |
+| `DialMatch` | Pure: whose number is being typed. Same digits or same last nine digits gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
 | `DialNumber` | Pure: what may be typed and how a number from another app is cleaned. Unit tested. |
 | `Calls` | `place()`: places a call through Telecom, asking for the call permission if needed. |
 | `CallService` | The `InCallService` Telecom binds while there is a call. The only owner of call state; answer, decline, hang up, speaker. |

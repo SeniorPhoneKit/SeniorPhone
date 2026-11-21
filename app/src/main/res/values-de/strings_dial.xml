@@ -7,4 +7,8 @@
     <string name="dial_plus">plus</string>
     <string name="dial_star">Stern</string>
     <string name="dial_hash">Raute</string>
+    <!-- Below the typed number: whose number it is. -->
+    <string name="dial_match_exact">✓ %1$s</string>
+    <!-- Below the typed number: the one contact whose number starts like this; a tap fills it in. -->
+    <string name="dial_match_prefix">%1$s? Tippen für %2$s</string>
 </resources>
