@@ -1,8 +1,10 @@
 package app.phueber.seniorphone;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,7 +82,7 @@ public class AutomationTest {
         assertNull(Automation.pickContact(Collections.emptyList(), "Maria"));
     }
 
-    @Test public void phoneByDigitsOrLastNine() {
+    @Test public void phoneByDigitsOrNationalForm() {
         List<String> numbers = Arrays.asList("030 1234567", "0171 2345678");
         assertEquals(1, Automation.pickPhone(numbers, "01712345678"));
         assertEquals(1, Automation.pickPhone(numbers, "+49 171 2345678"));
@@ -88,5 +90,24 @@ public class AutomationTest {
         assertEquals(-1, Automation.pickPhone(numbers, "0172 9999999"));
         assertEquals(-1, Automation.pickPhone(numbers, "4567"));
         assertEquals(-1, Automation.pickPhone(numbers, ""));
+    }
+
+    @Test public void sameEndingInAnotherAreaIsAnotherNumber() {
+        List<String> berlin = Collections.singletonList("+49 30 12345678");
+        assertEquals(-1, Automation.pickPhone(berlin, "+49 40 12345678"));
+        assertEquals(-1, Automation.pickPhone(berlin, "040 12345678"));
+        assertEquals(0, Automation.pickPhone(berlin, "030 12345678"));
+        assertEquals(0, Automation.pickPhone(berlin, "0049 30 12345678"));
+        assertEquals(-1, Automation.pickPhone(Collections.singletonList("030 12345678"), "040 12345678"));
+    }
+
+    @Test public void nationalAndInternationalForms() {
+        assertTrue(Automation.sameNumber("+49 (0)171 2345678", "0171 2345678"));
+        assertTrue(Automation.sameNumber("0171 2345678", "+49 171 2345678"));
+        assertTrue(Automation.sameNumber("+1 212 555 1234", "212 555 1234")); // no trunk 0
+        assertTrue(Automation.sameNumber("+43 1 234567", "01 234567"));
+        assertFalse(Automation.sameNumber("+49 171 2345678", "0172 2345678"));
+        assertFalse(Automation.sameNumber("+49 89 1234", "089 1234".substring(0, 5))); // too short
+        assertFalse(Automation.sameNumber(null, "0171"));
     }
 }

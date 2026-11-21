@@ -107,7 +107,7 @@ public final class AutomationActivity extends Activity {
     /**
      * The contact with this number, or -1. Android's own matching first; it
      * depends on the phone's country, so "0170 …" may miss a contact saved as
-     * "+49 170 …": then the same last digits (Automation.pickPhone). Background thread.
+     * "+49 170 …": then the national / country-code comparison (Automation.pickPhone). Background thread.
      */
     private static long byNumber(ContentResolver cr, String number) {
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));

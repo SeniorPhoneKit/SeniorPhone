@@ -43,4 +43,10 @@ public class DialMatchTest {
     @Test public void internationalTypedMatchesInternationalSaved() {
         assertEquals("Maria Schmidt", DialMatch.match(book, "+49171").entry.name);
     }
+
+    @Test public void sameEndingInAnotherAreaIsNobody() {
+        List<DialMatch.Entry> b = Arrays.asList(new DialMatch.Entry("Oma Berlin", "+49 30 12345678"));
+        assertNull(DialMatch.match(b, "04012345678"));
+        assertEquals(DialMatch.Kind.EXACT, DialMatch.match(b, "03012345678").kind);
+    }
 }

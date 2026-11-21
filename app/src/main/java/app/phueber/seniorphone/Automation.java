@@ -128,26 +128,54 @@ final class Automation {
 
     /**
      * Which of a contact's numbers is the given one: same digits, or the same
-     * last nine digits (so "+49 171 2345678" is "0171 2345678"); -1 if none.
+     * number written once with a country code and once nationally ("+49 171
+     * 2345678" is "0171 2345678", see {@link #sameNumber}); -1 if none.
      */
     static int pickPhone(List<String> numbers, String number) {
         String want = digits(number);
         if (want.length() == 0 || numbers == null) return -1;
         for (int i = 0; i < numbers.size(); i++) {
-            String have = digits(numbers.get(i));
-            if (have.equals(want)) return i;
+            if (digits(numbers.get(i)).equals(want)) return i;
         }
-        if (want.length() < 6) return -1;
-        String tail = tail(want);
         for (int i = 0; i < numbers.size(); i++) {
-            String have = digits(numbers.get(i));
-            if (have.length() >= 6 && tail(have).equals(tail)) return i;
+            if (sameNumber(numbers.get(i), number)) return i;
         }
         return -1;
     }
 
-    private static String tail(String digits) {
-        return digits.length() <= 9 ? digits : digits.substring(digits.length() - 9);
+    /**
+     * Whether two numbers are the same one, one with a country code ("+49 …" or
+     * "0049 …") and one in national form: the national number without its
+     * trunk 0 equals the international one without a 1-3 digit country code
+     * (a "(0)" after the country code is ignored). Two international or two
+     * national numbers must have the same digits ("+" and "00" alike): "+49 30 12345678" and
+     * "+49 40 12345678" end alike but are different people. National numbers
+     * shorter than 6 digits never match.
+     */
+    static boolean sameNumber(String a, String b) {
+        String da = digits(a), db = digits(b);
+        if (da.isEmpty()) return false;
+        if (da.equals(db)) return true;
+        String ia = international(a), ib = international(b);
+        if (ia != null && ib != null) return ia.equals(ib); // "+49 …" is "0049 …"
+        if (ia == null && ib == null) return false;
+        String intl = ia != null ? ia : ib;
+        String nat = ia != null ? db : da;
+        if (nat.length() < 6) return false;
+        String natRest = nat.startsWith("0") ? nat.substring(1) : nat;
+        for (int cc = 1; cc <= 3 && cc < intl.length(); cc++) {
+            String rest = intl.substring(cc);
+            if (rest.startsWith("0")) rest = rest.substring(1); // "+49 (0)171 …"
+            if (rest.equals(natRest)) return true;
+        }
+        return false;
+    }
+
+    /** The digits after "+" or "00", or null for a national number. */
+    private static String international(String s) {
+        String d = digits(s);
+        if (s != null && s.trim().startsWith("+")) return d;
+        return d.startsWith("00") ? d.substring(2) : null;
     }
 
     private static String digits(String s) {

@@ -27,7 +27,7 @@ colour theme (`Store`).
 | `Contacts` | Address-book access on one background thread (so a star or a delete always finishes before the reload after it). |
 | `ContactInfo`, `ContactList`, `ContactForm` | Pure: the contact value, sorting and sections (Ä under A, Favourites first), search key, form rules. Unit tested. |
 | `DialActivity` | The number pad; also what other apps open for "dial this number". |
-| `DialMatch` | Pure: whose number is being typed. Same digits or same last nine digits gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
+| `DialMatch` | Pure: whose number is being typed. Same number (same digits, or national vs. country-code form, `Automation.sameNumber`) gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
 | `DialNumber` | Pure: what may be typed and how a number from another app is cleaned. Unit tested. |
 | `Calls` | `place()`: places a call through Telecom, asking for the call permission if needed. |
 | `CallService` | The `InCallService` Telecom binds while there is a call. The only owner of call state; answer, decline, hang up, speaker, mute, keypad tones (DTMF). |
@@ -42,7 +42,7 @@ colour theme (`Store`).
 | `Store` | Own lock flag with PIN salt/hash, and theme, in device-protected storage (direct boot); `locked()` is the launcher's lock or our own; `unlock(pin)` lifts both; the reset PIN (`Pin.RESET`) works for either. |
 | `LauncherLock` | Reads SeniorLauncher's lock, and lifts it with its PIN; when the launcher cannot answer, the last known value is used (while it is installed). |
 | `Pin` | PIN validation, salted hash, constant-time compare, and the fixed reset PIN. Same as SeniorAlert's. Pure. |
-| `Automation` | Pure: the automation actions and extras, lenient parsing of the string extras, which contact a name means and which of its numbers a number is. Unit tested. |
+| `Automation` | Pure: the automation actions and extras, lenient parsing of the string extras, which contact a name means and which of its numbers a number is (`sameNumber`). Unit tested. |
 | `AutomationActivity` | Invisible trampoline for CALL, OPEN_CONTACT, OPEN_DIALPAD, OPEN_CONTACTS: finds the contact off the main thread, opens the page / pad / list, closes. Never calls. |
 | `AutomationReceiver` | Broadcasts LOCK, UNLOCK, SET_THEME, through `Store` on a background thread (goAsync). |
 | `CallControlReceiver` | Broadcasts ANSWER, HANG_UP, SPEAKER, LOUDER through `CallService`, guarded by ANSWER_PHONE_CALLS. |
@@ -126,7 +126,10 @@ what a command may do:
   usual "Call X?" question (`EXTRA_ASK_CALL`), so it gives another app no more
   than ACTION_DIAL does. A name must match one contact; several or none open
   the list searched for it. A number is looked up with Android's PhoneLookup,
-  then by its last nine digits (PhoneLookup depends on the phone's country).
+  then by `Automation.pickPhone` (PhoneLookup depends on the phone's
+  country): same digits, or one number with a country code and the other
+  national, equal after the trunk 0. Never by a shared ending alone:
+  +49 30 12345678 and +49 40 12345678 are different people.
   The trampoline uses CLEAR_TOP so an open contact page or pad is replaced
   rather than just brought to the front.
 - Call control (`CallControlReceiver`, broadcast): guarded by

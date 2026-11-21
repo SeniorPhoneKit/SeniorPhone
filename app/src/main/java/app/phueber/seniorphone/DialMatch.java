@@ -6,8 +6,9 @@ import java.util.List;
 /**
  * Who a number typed on the pad belongs to. Pure, unit tested.
  *
- * - EXACT: the typed number is a contact's number (same digits, or the same
- *   last nine digits, so "0171 234…" finds "+49 171 234…"): the pad says whose.
+ * - EXACT: the typed number is a contact's number (Automation.pickPhone: same
+ *   digits, or national vs. country-code form, so "0171 234…" finds
+ *   "+49 171 234…" but "040 …" never "+49 30 …"): the pad says whose.
  * - PREFIX: at least {@link #MIN_PREFIX} digits typed and exactly one contact
  *   number starts with them, also when it is saved with a country code: the pad
  *   offers it, one tap fills in the rest.
