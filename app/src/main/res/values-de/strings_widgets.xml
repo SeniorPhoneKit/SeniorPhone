@@ -15,6 +15,14 @@
     <string name="widget_allow">Kontakte erlauben</string>
     <string name="widget_allow_text">Tippen öffnet die Telefon-App, um den Zugriff auf Kontakte zu erlauben.</string>
     <string name="widget_no_favourites">Noch keine Favoriten</string>
+    <plurals name="widget_more">
+        <item quantity="one">+%d weitere – tippen für alle</item>
+        <item quantity="other">+%d weitere – tippen für alle</item>
+    </plurals>
+    <plurals name="widget_count">
+        <item quantity="one">%d Favorit – tippen zum Ansehen</item>
+        <item quantity="other">%d Favoriten – tippen für alle</item>
+    </plurals>
     <string name="widget_open_contacts">Tippen öffnet die Kontakte.</string>
     <string name="widget_gone_cd">Kontakt nicht gefunden. Öffnet die Kontakte.</string>
 </resources>

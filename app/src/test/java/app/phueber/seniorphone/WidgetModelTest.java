@@ -85,4 +85,44 @@ public class WidgetModelTest {
         assertNull(WidgetModel.decode("x1:key"));
         assertNull(WidgetModel.decode("-3:key"));
     }
+
+    private static void assertFit(int rows, int more, WidgetModel.Fit f) {
+        assertEquals("rows", rows, f.rows);
+        assertEquals("more", more, f.more);
+    }
+
+    @Test
+    public void allFitWhenThereIsRoom() {
+        assertFit(2, 0, WidgetModel.fit(2, 166)); // 80 + 6 + 80
+        assertFit(1, 0, WidgetModel.fit(1, 80));
+        assertFit(4, 0, WidgetModel.fit(4, 600));
+    }
+
+    @Test
+    public void neverHalfARow() {
+        // The reported case: room for Maria and half of Peter.
+        assertFit(1, 1, WidgetModel.fit(2, 146));
+        assertFit(1, 1, WidgetModel.fit(2, 165));
+        // A row plus the more line, but not a second row.
+        assertFit(1, 4, WidgetModel.fit(5, 138));
+        assertFit(3, 5, WidgetModel.fit(8, 3 * 86 + 52));
+        assertFit(2, 6, WidgetModel.fit(8, 3 * 86 + 51));
+    }
+
+    @Test
+    public void tooSmallForARowShowsOnlyTheCount() {
+        assertFit(0, 3, WidgetModel.fit(3, 100));
+        assertFit(0, 1, WidgetModel.fit(1, 60));
+    }
+
+    @Test
+    public void unknownHeightUsesTheMinimum() {
+        assertFit(1, 0, WidgetModel.fit(1, 0));
+        assertFit(0, 2, WidgetModel.fit(2, -1)); // 110: one row, but no room for the more line too
+    }
+
+    @Test
+    public void noFavouritesNoRows() {
+        assertFit(0, 0, WidgetModel.fit(0, 400));
+    }
 }

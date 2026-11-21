@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Favourites: one big row per favourite (RemoteViewsService), or a sentence
-     in words when there is nothing to show. Transparent around the rows: every
-     row and the sentence sit on their own opaque pill. -->
+<!-- Favourites: as many whole rows as fit (added in code, WidgetModel.fit), then
+     "+N more" when not all do; or a sentence in words when there is nothing to
+     show. Transparent around the rows: every row and the sentence sit on their
+     own opaque pill. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ListView
-        android:id="@+id/fav_list"
+    <LinearLayout
+        android:id="@+id/fav_rows"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="6dp"
-        android:listSelector="@android:color/transparent"
-        android:scrollbars="none" />
+        android:orientation="vertical" />
 
     <FrameLayout
         android:id="@+id/fav_empty"

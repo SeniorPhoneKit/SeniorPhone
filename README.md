@@ -54,7 +54,9 @@ Needs Android 8.0 or newer and a phone with a SIM card.
 - **Call** (one person): one tile with a person's picture and first name.
   When you add it, choose who it calls. A tap asks "Call Maria Schmidt?".
 - **Favourites**: your favourites, one big row each. A tap asks "Call …?".
-  It follows the stars in Contacts by itself.
+  It follows the stars in Contacts by itself. It shows as many whole rows as
+  fit and never scrolls; when not all fit, the last line says "+3 more – tap
+  to see all" and opens Contacts. Make it taller to see more.
 
 With SeniorLauncher: home screen → **Widgets** → search "Phone" → tap the
 widget. The Favourites widget can be made taller there (1 row, 2 rows, Full
@@ -150,7 +152,10 @@ Benötigt Android 8.0 oder neuer und ein Telefon mit SIM-Karte.
   Beim Hinzufügen wählen Sie, wen sie anruft. Ein Tippen fragt
   „Maria Schmidt anrufen?“.
 - **Favoriten**: Ihre Favoriten, jede Person eine große Zeile. Ein Tippen fragt
-  „… anrufen?“. Folgt von selbst den Sternen in den Kontakten.
+  „… anrufen?“. Folgt von selbst den Sternen in den Kontakten. Es zeigt so
+  viele ganze Zeilen, wie hineinpassen, und blättert nie; passen nicht alle,
+  sagt die letzte Zeile „+3 weitere – tippen für alle“ und öffnet die
+  Kontakte. Höher gemacht zeigt es mehr.
 
 Mit SeniorLauncher: Startseite → **Widgets** → „Telefon“ suchen → Widget
 antippen. Das Favoriten-Widget lässt sich dort höher machen (1 Zeile,

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- One favourite, like a row of the contact list: picture and name on a card
-     pill with the theme's border. The whole row is the button. -->
+     pill with the theme's border. The whole row is the button. Height and gap
+     are WidgetModel.ROW_DP and GAP_DP: keep them in step. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/row_root"
     android:layout_width="match_parent"
-    android:layout_height="80dp">
+    android:layout_height="80dp"
+    android:layout_marginBottom="6dp">
 
     <ImageView
         android:id="@+id/row_border"

@@ -17,7 +17,6 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.provider.ContactsContract;
 import android.widget.RemoteViews;
 
@@ -166,15 +165,14 @@ final class PhoneWidgets {
     }
 
     /**
-     * The favourites list's template: each row fills in its contact id. Must be
-     * mutable for the fill-in; it is explicit (our own activity), so nothing
-     * else can be put in its place.
+     * A favourites row: like {@link #call}, but one per contact on the same
+     * widget. The action carries the id, since extras alone do not make two
+     * PendingIntents different and the last row would win.
      */
-    static PendingIntent callTemplate(Context c, int widgetId) {
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) flags |= PendingIntent.FLAG_MUTABLE;
+    static PendingIntent favourite(Context c, int widgetId, long contactId) {
         return PendingIntent.getActivity(c, widgetId,
-                callIntent(c).setAction("app.phueber.seniorphone.widget.FAVOURITE"), flags);
+                callIntent(c).setAction("app.phueber.seniorphone.widget.FAVOURITE." + contactId)
+                        .putExtra(ContactActivity.EXTRA_ID, contactId), immutable());
     }
 
     /** The contact list; it also asks for the contacts permission when it is missing. */

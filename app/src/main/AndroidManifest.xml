@@ -177,10 +177,6 @@
                 android:resource="@xml/widget_favourites" />
         </receiver>
         <service
-            android:name=".FavouritesWidgetService"
-            android:exported="false"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-        <service
             android:name=".ContactsChangedJob"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />

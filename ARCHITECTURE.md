@@ -47,11 +47,11 @@ colour theme (`Store`).
 | `AutomationReceiver` | Broadcasts LOCK, UNLOCK, SET_THEME, through `Store` on a background thread (goAsync). |
 | `CallControlReceiver` | Broadcasts ANSWER, HANG_UP, SPEAKER, LOUDER through `CallService`, guarded by ANSWER_PHONE_CALLS. |
 | `PersonWidget` | Widget: one person, one cell. Round photo or letter, the first name big; tap → their page with "Call …?". Deleted: "?" → the list. |
-| `FavouritesWidget`, `FavouritesWidgetService` | Widget: the favourites as big rows (RemoteViewsService, so 8–15 alike); tap a row → "Call …?". Empty: "No favourites yet" → the list. |
+| `FavouritesWidget` | Widget: as many favourites as whole rows fit its height, then "+N more" → the list; tap a row → "Call …?". Empty: "No favourites yet" → the list. |
 | `WidgetPickActivity` | The one-person widget's configuration: contacts, favourites first, search. Cancel = RESULT_CANCELED. Also reconfigure. |
 | `PhoneWidgets` | What both widgets share: the remembered person (id + lookup key), coalesced refresh, ContentObserver, round pictures, taps. |
 | `ContactsChangedJob` | JobScheduler content trigger on the address book: redraws the widgets while the app is not running. |
-| `WidgetModel` | Pure: first name for the button, favourites order, the stored pick. Unit tested. |
+| `WidgetModel` | Pure: first name for the button, favourites order, how many rows fit a height (`fit`), the stored pick. Unit tested. |
 | `PinDialog` | Choose a PIN (twice); enter it to unlock. The unlock prompt closes after 10 s without typing. |
 
 ## A call can always be answered, declined and ended
@@ -145,11 +145,24 @@ Two home-screen widgets, in the app's own colours (`Store` theme), big text:
   (`Contacts.find`). SeniorLauncher shows it like an app tile, with the
   widget's label ("Call") below.
 - **Favourites** (`FavouritesWidget`, wide, 4x2 by default, resizable taller
-  but never one cell): one row per starred contact, in the contact list's
-  order (`WidgetModel.favourites`). Rows come from a `RemoteViewsService`
-  rather than `RemoteCollectionItems` (31+ only, and all photos in one
-  parcel); its factory clears the calling identity, or the contacts provider
-  would check the home screen's permissions.
+  but never one cell): the starred contacts, in the contact list's order
+  (`WidgetModel.favourites`), as fixed 80 dp rows. Only whole rows, never a
+  scrolling list (a senior does not see that a half row means "there is
+  more"): `WidgetModel.fit` takes the widget's height and gives how many rows
+  fit; when not all do, the last line is "+N more – tap to see all" (the
+  contact list) instead of a row. The rows are plain RemoteViews added into
+  a LinearLayout (`removeAllViews` first: the home screen applies updates
+  onto the views it has, so rows would pile up). The height: on 12+ one
+  layout per entry of `OPTION_APPWIDGET_SIZES` (the home screen picks);
+  before, `OPTION_APPWIDGET_MIN_HEIGHT` (the smaller of portrait and
+  landscape, so nothing is cut). `onAppWidgetOptionsChanged` redraws on a
+  resize. Each row has its own PendingIntent (the contact id in the action,
+  or rows would share one).
+
+The widget list shows `previewLayout` (12+) and, before and in launchers
+that use it (SeniorLauncher), `previewImage`: vector pictures in the Light
+colours, Maria for the one-person widget and three rows for the favourites,
+with hand-drawn stroke letters (no font asset).
 
 A tap never calls: it opens the contact page with `EXTRA_ASK_CALL`, the same
 "Call Maria Schmidt?" question automation's CALL gets (with several numbers,

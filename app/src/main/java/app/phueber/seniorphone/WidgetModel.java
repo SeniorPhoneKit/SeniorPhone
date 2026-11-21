@@ -22,7 +22,45 @@ final class WidgetModel {
         }
     }
 
+    /** Height of one favourites row, the space between rows, and the "+N more" line (dp). */
+    static final int ROW_DP = 80;
+    static final int GAP_DP = 6;
+    static final int MORE_DP = 52;
+    /** Used when the home screen has not told the widget its size (the provider's minHeight). */
+    static final int DEFAULT_HEIGHT_DP = 110;
+
+    /**
+     * What the favourites widget shows at a height: the first {@code rows}
+     * favourites as whole rows, then, when {@code more > 0}, one line
+     * "+N more – tap to see all" (with no rows: "N favourites – tap to see all").
+     */
+    static final class Fit {
+        final int rows;
+        final int more;
+
+        Fit(int rows, int more) {
+            this.rows = rows;
+            this.more = more;
+        }
+    }
+
     private WidgetModel() {}
+
+    /**
+     * How many of {@code count} favourites fit as whole rows into a widget
+     * {@code heightDp} tall, so no row is ever cut in half (a senior would not
+     * know the rest is there). When not all fit, the last line is the "more"
+     * line instead of a row. heightDp <= 0 means unknown.
+     */
+    static Fit fit(int count, int heightDp) {
+        if (count <= 0) return new Fit(0, 0);
+        int h = heightDp > 0 ? heightDp : DEFAULT_HEIGHT_DP;
+        if (count * ROW_DP + (count - 1) * GAP_DP <= h) return new Fit(count, 0);
+        // Each shown row takes its gap below it; the more line comes last.
+        int rows = Math.max(0, (h - MORE_DP) / (ROW_DP + GAP_DP));
+        rows = Math.min(rows, count - 1);
+        return new Fit(rows, count - rows);
+    }
 
     /**
      * The first name, shown big on the one-person button: "Maria Schmidt" →

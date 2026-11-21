@@ -16,6 +16,16 @@
     <string name="widget_allow">Allow contacts</string>
     <string name="widget_allow_text">Tap to open the phone app and allow access to contacts.</string>
     <string name="widget_no_favourites">No favourites yet</string>
+    <!-- The favourites widget's last line when not all fit; it opens the contact list. -->
+    <plurals name="widget_more">
+        <item quantity="one">+%d more – tap to see all</item>
+        <item quantity="other">+%d more – tap to see all</item>
+    </plurals>
+    <!-- The same line when not even one row fits. -->
+    <plurals name="widget_count">
+        <item quantity="one">%d favourite – tap to see it</item>
+        <item quantity="other">%d favourites – tap to see all</item>
+    </plurals>
     <string name="widget_open_contacts">Tap to open Contacts.</string>
     <!-- TalkBack: the one-person widget when its contact was deleted. -->
     <string name="widget_gone_cd">Contact not found. Opens the contacts.</string>

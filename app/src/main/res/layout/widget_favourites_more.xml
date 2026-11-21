@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The favourites widget's last line when not all favourites fit: "+3 more –
+     tap to see all", opening the contact list. Height is WidgetModel.MORE_DP. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/more_root"
+    android:layout_width="match_parent"
+    android:layout_height="52dp">
+
+    <ImageView
+        android:id="@+id/more_border"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_round" />
+
+    <ImageView
+        android:id="@+id/more_fill"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="2dp"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_round" />
+
+    <TextView
+        android:id="@+id/more_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:autoSizeMaxTextSize="22sp"
+        android:autoSizeMinTextSize="14sp"
+        android:autoSizeTextType="uniform"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:maxLines="1"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="@color/text_black"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+</FrameLayout>
