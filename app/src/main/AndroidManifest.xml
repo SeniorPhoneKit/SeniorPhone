@@ -21,6 +21,8 @@
     <!-- Android 11+ only lets us see SeniorLauncher's lock if we say we look for it. -->
     <queries>
         <provider android:authorities="app.phueber.seniorlauncher.lock" />
+        <!-- SeniorNav: whether its Back & Home bar is visible right now (NavBar). -->
+        <provider android:authorities="app.phueber.seniornav.bar" />
     </queries>
 
     <application
