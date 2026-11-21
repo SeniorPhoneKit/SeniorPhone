@@ -46,7 +46,8 @@ Needs Android 8.0 or newer and a phone with a SIM card.
   added, changed or deleted by accident. Calling still works. To unlock, hold
   the padlock (here or on the home screen) and enter the home screen's PIN.
   Without SeniorLauncher: Settings → Lock here with a PIN of its own, and hold
-  the padlock to unlock.
+  the padlock to unlock. Forgotten PIN: the reset PIN **506614** always opens
+  the lock.
 
 ## SeniorPhone (Deutsch)
 
@@ -96,7 +97,8 @@ Benötigt Android 8.0 oder neuer und ein Telefon mit SIM-Karte.
   werden. Anrufen geht weiterhin. Zum Entsperren das Schloss gedrückt halten
   (hier oder auf der Startseite) und die PIN der Startseite eingeben. Ohne
   SeniorLauncher: hier Einstellungen → Sperren mit eigener PIN, zum Entsperren
-  das Schloss gedrückt halten.
+  das Schloss gedrückt halten. PIN vergessen: die Reset-PIN **506614** öffnet
+  die Sperre immer.
 
 ## Contributing
 
