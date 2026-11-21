@@ -49,8 +49,10 @@ public final class Calls {
             }
             tm.placeCall(Uri.fromParts("tel", n, null), new Bundle());
         } catch (SecurityException e) {
-            // Permission revoked between the check and the call: nothing to do.
+            // Permission revoked between the check and the call, or calling refused
+            // by policy: say so, or the senior taps Call again and again.
             Log.w(TAG, "placeCall refused", e);
+            failed(a);
         } catch (Throwable t) {
             Log.e(TAG, "placeCall", t);
             failed(a);
