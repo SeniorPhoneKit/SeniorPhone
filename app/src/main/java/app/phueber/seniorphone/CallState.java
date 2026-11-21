@@ -113,9 +113,19 @@ final class CallState {
      * Ended/ending calls never get the screen. -1 if no call is live.
      */
     static int pickPrimary(int[] states, long[] order) {
+        return pickPrimary(states, order, null);
+    }
+
+    /**
+     * As above, but calls with partOf[i] true are skipped: the participants of a
+     * conference, whose conference call is in the list too. The conference gets
+     * the screen, so Hang up ends all of it, not just one person.
+     */
+    static int pickPrimary(int[] states, long[] order, boolean[] partOf) {
         int best = -1;
         int bestRank = Integer.MAX_VALUE;
         for (int i = 0; i < states.length; i++) {
+            if (partOf != null && partOf[i]) continue;
             int r = rank(screen(states[i]));
             if (r < 0) continue;
             if (r < bestRank || (r == bestRank && order[i] > order[best])) {
@@ -140,9 +150,15 @@ final class CallState {
      * not ringing, preferring an active one over a held one. -1 if none.
      */
     static int newestOngoing(int[] states, long[] order) {
+        return newestOngoing(states, order, null);
+    }
+
+    /** As above, skipping conference participants (see pickPrimary). */
+    static int newestOngoing(int[] states, long[] order, boolean[] partOf) {
         int best = -1;
         int bestRank = Integer.MAX_VALUE;
         for (int i = 0; i < states.length; i++) {
+            if (partOf != null && partOf[i]) continue;
             Screen s = screen(states[i]);
             if (s == Screen.INCOMING) continue;
             int r = rank(s);

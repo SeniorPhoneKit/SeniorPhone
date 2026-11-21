@@ -5,6 +5,7 @@
     <string name="call_channel_quiet">Laufende Anrufe</string>
     <string name="call_channel_quiet_description">Zeigt ein laufendes Gespräch, mit einer Taste zum Auflegen.</string>
     <string name="call_unknown_number">Unbekannte Nummer</string>
+    <string name="call_conference">Telefonkonferenz</string>
     <string name="call_is_calling">ruft an</string>
     <string name="call_waiting_hint">Wenn Sie annehmen, wird Ihr anderes Gespräch gehalten.</string>
     <string name="call_answer">Annehmen</string>

@@ -6,6 +6,7 @@
     <string name="call_channel_quiet">Ongoing calls</string>
     <string name="call_channel_quiet_description">Shows a call that is going on, with a Hang-up button.</string>
     <string name="call_unknown_number">Unknown number</string>
+    <string name="call_conference">Conference call</string>
     <string name="call_is_calling">is calling</string>
     <string name="call_waiting_hint">Answering puts your other call on hold.</string>
     <string name="call_answer">Answer</string>

@@ -181,4 +181,18 @@ public class CallStateTest {
         // 5 is CallAudioState.ROUTE_WIRED_OR_EARPIECE.
         assertEquals(5, routeForSpeakerOff(0));
     }
+
+    @Test
+    public void conferenceParticipantsNeverGetTheScreen() {
+        // Two participants (newer) and their conference call: the conference wins.
+        int[] s = {T_ACTIVE, T_ACTIVE, T_ACTIVE};
+        long[] o = {1, 2, 3};
+        boolean[] partOf = {false, true, true};
+        assertEquals(0, pickPrimary(s, o, partOf));
+        assertEquals(0, newestOngoing(s, o, partOf));
+        // A new ringing call still comes first.
+        assertEquals(3, pickPrimary(new int[] {T_ACTIVE, T_ACTIVE, T_ACTIVE, T_RINGING},
+                new long[] {1, 2, 3, 4}, new boolean[] {false, true, true, false}));
+        assertEquals(-1, pickPrimary(new int[] {T_ACTIVE}, new long[] {1}, new boolean[] {true}));
+    }
 }

@@ -95,7 +95,10 @@ public final class CallService extends InCallService {
         String title() {
             Call.Details d = call.getDetails();
             String network = d != null ? d.getCallerDisplayName() : null;
-            return CallState.title(contactName, network, formatted());
+            String t = CallState.title(contactName, network, formatted());
+            CallService s = instance;
+            if (t == null && s != null && isConference()) t = s.getString(R.string.call_conference);
+            return t;
         }
 
         /** The formatted number, or null. */
@@ -107,6 +110,29 @@ public final class CallService extends InCallService {
         long connectTime() {
             Call.Details d = call.getDetails();
             return d != null ? Math.max(0, d.getConnectTimeMillis()) : 0;
+        }
+
+        /** A participant of a live conference call we also hold (see partOfConference). */
+        boolean inConference() {
+            try {
+                Call parent = call.getParent();
+                if (parent == null) return false;
+                Entry p = find(parent);
+                return p != null && CallState.isLive(p.state());
+            } catch (Throwable t) {
+                return false;
+            }
+        }
+
+        /** The conference call itself: it has no number of its own. */
+        boolean isConference() {
+            try {
+                if (!call.getChildren().isEmpty()) return true;
+                Call.Details d = call.getDetails();
+                return d != null && d.hasProperty(Call.Details.PROPERTY_CONFERENCE);
+            } catch (Throwable t) {
+                return false;
+            }
         }
 
         int disconnectCode() {
@@ -177,6 +203,15 @@ public final class CallService extends InCallService {
         }
 
         @Override public void onCallDestroyed(Call call) {
+            changed();
+        }
+
+        // A call joined or left a conference: the screen goes to the conference.
+        @Override public void onParentChanged(Call call, Call parent) {
+            changed();
+        }
+
+        @Override public void onChildrenChanged(Call call, List<Call> children) {
             changed();
         }
     };
@@ -260,7 +295,7 @@ public final class CallService extends InCallService {
 
     /** The call that owns the screen, or null. */
     static Entry primary() {
-        int i = CallState.pickPrimary(states(), orders());
+        int i = CallState.pickPrimary(states(), orders(), partOfConference());
         return i < 0 ? null : entries.get(i);
     }
 
@@ -281,7 +316,9 @@ public final class CallService extends InCallService {
 
     /** Whether another live call exists besides the given one (call waiting). */
     static boolean hasOtherLiveCall(Entry than) {
-        for (Entry e : entries) if (e != than && CallState.isLive(e.state())) return true;
+        for (Entry e : entries) {
+            if (e != than && !e.inConference() && CallState.isLive(e.state())) return true;
+        }
         return false;
     }
 
@@ -504,6 +541,19 @@ public final class CallService extends InCallService {
         return s;
     }
 
+    /**
+     * Which calls are participants of a conference whose conference call we
+     * also hold and is live: they are skipped for the screen and the ongoing
+     * notification, so Hang up ends the whole conference. A participant whose
+     * conference we do not know (yet) stays an ordinary call, so it never
+     * loses its Hang-up button.
+     */
+    private static boolean[] partOfConference() {
+        boolean[] p = new boolean[entries.size()];
+        for (int i = 0; i < p.length; i++) p[i] = entries.get(i).inConference();
+        return p;
+    }
+
     private static long[] orders() {
         long[] o = new long[entries.size()];
         for (int i = 0; i < o.length; i++) o[i] = entries.get(i).order;
@@ -565,7 +615,7 @@ public final class CallService extends InCallService {
         } else {
             CallNotifier.cancelIncoming(this);
         }
-        int g = CallState.newestOngoing(s, o);
+        int g = CallState.newestOngoing(s, o, partOfConference());
         if (g >= 0) {
             Entry e = entries.get(g);
             CallNotifier.showOngoing(this, e.key, e.title(), e.screen(), e.connectTime(), force);
