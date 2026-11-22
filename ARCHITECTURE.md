@@ -136,7 +136,9 @@ what a command may do:
   then by `Automation.pickPhone` (PhoneLookup depends on the phone's
   country): same digits, or one number with a country code and the other
   national, equal after the trunk 0. Never by a shared ending alone:
-  +49 30 12345678 and +49 40 12345678 are different people.
+  +49 30 12345678 and +49 40 12345678 are different people. When the page
+  found has no such number (PhoneLookup is looser than our rule), the
+  question names the number, not the person: "Call 0171 2345678?".
   A contact page is opened over a fresh contact list
   (`ContactActivity.overList`, also used by the widgets and the missed-call
   notification), so it is always the page asked for and Back goes to the
