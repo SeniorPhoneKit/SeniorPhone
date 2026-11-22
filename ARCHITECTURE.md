@@ -167,6 +167,26 @@ what a command may do:
 Broadcasts are preferred: they need no overlay permission from the sender
 when it runs in the background. Nothing is reported back.
 
+Open by decision: `AutomationActivity` and `AutomationReceiver` take commands
+from any app, with no permission and no caller check, so Trigly, Tasker and
+the like work without setup. What that allows is therefore limited in the
+app itself, not by who sends:
+
+- No app can place a call through us: every call stops at "Call X?", and
+  its Yes ignores taps for 0.7 s after the question appears (or gets the
+  focus back), drops taps through other windows and, on 12+, hides other
+  apps' overlays (`Ui.confirm`).
+- A number from outside (automation's `number`, a tel: link) with `*` or `#`
+  is refused, so no network code (call forwarding, USSD) arrives pre-typed
+  (`DialNumber.fromOutside`).
+- A contact's name is shown only for one of the contact's own numbers, by
+  the phone's own country (`Automation.sameNumber`, and the number itself in
+  "Call …?" otherwise).
+- Missed calls can be marked seen only from our own notification
+  (`MissedCalls`).
+- Call control needs ANSWER_PHONE_CALLS (`CallControlReceiver`); the lock is
+  a guard rail, not security (`AutomationReceiver`).
+
 ## Widgets
 
 Two home-screen widgets, in the app's own colours (`Store` theme), big text:
