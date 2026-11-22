@@ -7,8 +7,9 @@ import java.util.List;
  * Who a number typed on the pad belongs to. Pure, unit tested.
  *
  * - EXACT: the typed number is a contact's number (Automation.pickPhone: same
- *   digits, or national vs. country-code form, so "0171 234…" finds
- *   "+49 171 234…" but "040 …" never "+49 30 …"): the pad says whose.
+ *   digits, or national vs. country-code form in the phone's own country, so
+ *   "0171 234…" finds "+49 171 234…" on a German phone, but "040 …" never
+ *   "+49 30 …"): the pad says whose.
  * - PREFIX: at least {@link #MIN_PREFIX} digits typed and exactly one contact
  *   number starts with them, also when it is saved with a country code: the pad
  *   offers it, one tap fills in the rest.
@@ -41,13 +42,13 @@ final class DialMatch {
 
     private DialMatch() {}
 
-    static Result match(List<Entry> entries, String typed) {
+    static Result match(List<Entry> entries, String typed, Automation.Home home) {
         if (entries == null || entries.isEmpty()) return null;
         String want = digits(typed);
         if (want.isEmpty()) return null;
         List<String> numbers = new ArrayList<>();
         for (Entry e : entries) numbers.add(e.number);
-        int exact = Automation.pickPhone(numbers, typed);
+        int exact = Automation.pickPhone(numbers, typed, home);
         if (exact >= 0) return new Result(Kind.EXACT, entries.get(exact));
         if (want.length() < MIN_PREFIX) return null;
         Entry found = null;

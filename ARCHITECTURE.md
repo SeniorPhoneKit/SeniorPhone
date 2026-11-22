@@ -26,25 +26,25 @@ colour theme (`Store`).
 | `EditContactActivity` | Our own simple form: first name, last name, one number. Not available when locked. |
 | `Contacts` | Address-book access on one background thread (so a star or a delete always finishes before the reload after it). |
 | `ContactInfo`, `ContactList`, `ContactForm` | Pure: the contact value, sorting and sections (Ä under A, Favourites first), search key, form rules. Unit tested. |
-| `DialActivity` | The number pad; also what other apps open for "dial this number". |
-| `DialMatch` | Pure: whose number is being typed. Same number (same digits, or national vs. country-code form, `Automation.sameNumber`) gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
-| `DialNumber` | Pure: what may be typed and how a number from another app is cleaned. Unit tested. |
+| `DialActivity` | The number pad; also what other apps open for "dial this number". A number from outside (tel: link, automation) with `*` or `#` is refused and the pad opens empty: it is an MMI/USSD code ("**21*…#" forwards every call), not a number. Codes typed on the pad work as always. |
+| `DialMatch` | Pure: whose number is being typed. Same number (same digits, or national vs. country-code form of the phone's own country, `Automation.sameNumber`) gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
+| `DialNumber` | Pure: what may be typed and how a number from another app is cleaned (`clean`) or refused when it is a code (`fromOutside`). Unit tested. |
 | `Calls` | `place()`: places a call through Telecom, asking for the call permission if needed; refused (a call is already on: `busy()`) or failed, it says so. |
 | `CallBanner` | The green "Back to the call" on the list, the pad and a contact page; follows `CallService` while the screen is started. |
 | `CallService` | The `InCallService` Telecom binds while there is a call. The only owner of call state; answer, decline, hang up, speaker, mute, keypad tones (DTMF). |
 | `CallActivity` | The call screen: incoming (Answer / Decline), calling and connected (Hang up, Speaker, Louder, Microphone, Keypad), ended. Over the lock screen. The keypad (also opened by Telecom's `onBringToForeground(showDialpad)`) is a big 0–9 * # pad in the number pad's look (`DialActivity.keyView`) that sends `playDtmfTone`/`stopDtmfTone` and shows the typed digits; Hang up keeps its size and place. |
 | `CallNotifier` | The incoming-call notification (full screen, Answer / Decline) and the ongoing one (Hang up). |
 | `CallActionReceiver` | Decline and Hang up from the notifications. After a process restart (Telecom has not bound the call service in this process yet), a tap is kept for 3 s and applied when the call arrives; otherwise a tap that finds no call only removes the notification, so it can never end the next call. |
-| `MissedCalls` | Receiver for Telecom's `ACTION_SHOW_MISSED_CALLS_NOTIFICATION` (as the phone app, Telecom leaves the notification to us): one big notification, title = caller's name or number, text "Missed call · 14:05" (reads well on SeniorLauncher's notification card), newest missed call from the call log. Tap: the person's page (over the list) or the pad with the number; Call back: the same with "Call …?". Opening, Call back or swiping tells Telecom they were seen (`cancelMissedCallsNotification`). The call-log VIEW intent (`vnd.android.cursor.dir/calls`) opens the contact list: there is no call-log screen. |
+| `MissedCalls` | Receiver for Telecom's `ACTION_SHOW_MISSED_CALLS_NOTIFICATION` (as the phone app, Telecom leaves the notification to us): one big notification, title = caller's name or number, text "Missed call · 14:05" (reads well on SeniorLauncher's notification card), newest missed call from the call log. Tap: the person's page (over the list) or the pad with the number; Call back: the same with "Call …?". Opening, Call back or swiping tells Telecom they were seen (`cancelMissedCallsNotification`). Only our own notification can do that: the swipe goes to the non-exported `MissedCalls.Seen` (the exported `MissedCalls` only takes Telecom's broadcast), and the pad and the list honour the "seen" extra only when started through the non-exported aliases `MissedCallDial` / `MissedCallList` (or on the non-exported contact page), so another app cannot silently clear the missed calls. The call-log VIEW intent (`vnd.android.cursor.dir/calls`) opens the contact list: there is no call-log screen. |
 | `CallState` | Pure: Telecom states to screens, which call gets the screen (never a conference participant: the conference call does, so Hang up ends all of it), why a call ended, the timer text. Unit tested. |
 | `Role` | Asks once per start to become the phone app; Settings shows the state. |
 | `SettingsActivity` | Lock (choose a PIN), Colours, Phone app, phone settings. |
-| `Ui`, `Palette` | Copied from SeniorLauncher: shared buttons, screens and dialogs; the four colour themes, contrast-tested. |
+| `Ui`, `Palette` | Copied from SeniorLauncher: shared buttons, screens and dialogs; the four colour themes, contrast-tested. `Ui.confirm` (every "Call X?") ignores Yes until it has been in front for 0.7 s (again after it gets the focus back), drops taps through another app's window (`filterTouchesWhenObscured`) and, on 12+, hides other apps' overlays while it shows (`HIDE_OVERLAY_WINDOWS`): another app can open the question, so it must not be able to time or disguise the tap on Yes. |
 | `NavBar` | Whether SeniorNav's Back & Home bar is visible: SeniorNav's read-only provider `content://app.phueber.seniornav.bar/state` (column `visible`, also 0 while automation pauses the bar), observed live while the Back button is attached; without that provider, whether its accessibility service is enabled. While the bar shows, the pinned Back button is hidden, since the bar already has Back and Home; also re-checked whenever a screen gets focus. Pure part unit tested. |
 | `Store` | Own lock flag with PIN salt/hash, and theme, in device-protected storage (direct boot); `locked()` is the launcher's lock or our own; `unlock(pin)` lifts both; the reset PIN (`Pin.RESET`) works for either. |
 | `LauncherLock` | Reads SeniorLauncher's lock, and lifts it with its PIN; when the launcher cannot answer, the last known value is used (while it is installed). |
 | `Pin` | PIN validation, salted hash, constant-time compare, and the fixed reset PIN. Same as SeniorAlert's. Pure. |
-| `Automation` | Pure: the automation actions and extras, lenient parsing of the string extras, which contact a name means and which of its numbers a number is (`sameNumber`). Unit tested. |
+| `Automation` | Pure: the automation actions and extras, lenient parsing of the string extras, which contact a name means and which of its numbers a number is (`sameNumber`). Unit tested. The phone's country comes in as `Automation.Home` (`Contacts.home`: network country, else SIM country, through `PhoneNumberUtils.formatNumberToE164`; Android has no public country-to-calling-code table). |
 | `AutomationActivity` | Invisible trampoline for CALL, OPEN_CONTACT, OPEN_DIALPAD, OPEN_CONTACTS: finds the contact off the main thread, opens the page / pad / list, closes. Never calls. |
 | `AutomationReceiver` | Broadcasts LOCK, UNLOCK, SET_THEME, through `Store` on a background thread (goAsync). |
 | `CallControlReceiver` | Broadcasts ANSWER, HANG_UP, SPEAKER, LOUDER through `CallService`, guarded by ANSWER_PHONE_CALLS. |
@@ -77,7 +77,7 @@ This is the part that must never fail.
   with its normal ringtone and volume.
 - Answer is huge and on top, Decline smaller and below: declining by mistake
   is worse than answering by mistake, and stacked buttons cannot be hit by a
-  sideways slip. New screens ignore taps for 0.7 s, so a tap meant for what
+  sideways slip. New screens ignore taps for 0.7 s (`Ui.TOUCH_GUARD_MS`), so a tap meant for what
   was there before never lands on Hang up. Calling and connected have the
   same buttons in the same places, so the other side answering does not
   restart that pause.
@@ -135,8 +135,16 @@ what a command may do:
   the list searched for it. A number is looked up with Android's PhoneLookup,
   then by `Automation.pickPhone` (PhoneLookup depends on the phone's
   country): same digits, or one number with a country code and the other
-  national, equal after the trunk 0. Never by a shared ending alone:
-  +49 30 12345678 and +49 40 12345678 are different people.
+  national, where the national one, read as a number of the phone's own
+  country (network, else SIM), is the international one. Never by a shared
+  ending alone: +49 30 12345678 and +49 40 12345678 are different people;
+  and never across countries: on a German phone "+43 171 2345678" is not the
+  contact saved as "0171 2345678", or a caller from abroad would get that
+  contact's name and picture on the call screen. Country unknown: only same
+  digits match. The call screen and the missed-call notification use the
+  same rule when PhoneLookup misses (`Contacts.idByNumber`). When the page
+  found has no such number (PhoneLookup is looser than our rule), the
+  question names the number, not the person: "Call 0171 2345678?".
   A contact page is opened over a fresh contact list
   (`ContactActivity.overList`, also used by the widgets and the missed-call
   notification), so it is always the page asked for and Back goes to the
@@ -158,6 +166,26 @@ what a command may do:
 
 Broadcasts are preferred: they need no overlay permission from the sender
 when it runs in the background. Nothing is reported back.
+
+Open by decision: `AutomationActivity` and `AutomationReceiver` take commands
+from any app, with no permission and no caller check, so Trigly, Tasker and
+the like work without setup. What that allows is therefore limited in the
+app itself, not by who sends:
+
+- No app can place a call through us: every call stops at "Call X?", and
+  its Yes ignores taps for 0.7 s after the question appears (or gets the
+  focus back), drops taps through other windows and, on 12+, hides other
+  apps' overlays (`Ui.confirm`).
+- A number from outside (automation's `number`, a tel: link) with `*` or `#`
+  is refused, so no network code (call forwarding, USSD) arrives pre-typed
+  (`DialNumber.fromOutside`).
+- A contact's name is shown only for one of the contact's own numbers, by
+  the phone's own country (`Automation.sameNumber`, and the number itself in
+  "Call …?" otherwise).
+- Missed calls can be marked seen only from our own notification
+  (`MissedCalls`).
+- Call control needs ANSWER_PHONE_CALLS (`CallControlReceiver`); the lock is
+  a guard rail, not security (`AutomationReceiver`).
 
 ## Widgets
 

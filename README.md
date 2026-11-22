@@ -77,7 +77,8 @@ Other apps can control SeniorPhone with intents to package
 `app.phueber.seniorphone`. Every action starts with
 `app.phueber.seniorphone.action.`; all extras are text. Placing a call always
 stops at the "Call Maria Schmidt?" question: no app can make SeniorPhone call
-by itself.
+by itself. A `number` with `*` or `#` (a network code such as call
+forwarding) is ignored; such codes can only be typed on the number pad.
 
 | Send as | Action | Extras | What it does |
 |---|---|---|---|
@@ -185,7 +186,9 @@ Andere Apps können SeniorPhone mit Intents an das Paket
 `app.phueber.seniorphone` steuern. Jede Aktion beginnt mit
 `app.phueber.seniorphone.action.`; alle Extras sind Text. Ein Anruf endet
 immer bei der Frage „Maria Schmidt anrufen?“: Keine App kann SeniorPhone von
-selbst anrufen lassen.
+selbst anrufen lassen. Eine `number` mit `*` oder `#` (ein Netzcode wie eine
+Rufumleitung) wird ignoriert; solche Codes lassen sich nur auf dem Tastenfeld
+eintippen.
 
 | Senden als | Aktion | Extras | Was passiert |
 |---|---|---|---|

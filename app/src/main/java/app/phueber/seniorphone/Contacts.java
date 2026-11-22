@@ -443,11 +443,13 @@ final class Contacts {
 
     /**
      * The contact whose saved number is the same as {@code number} by our own rule
-     * (Automation.sameNumber: same digits, or +CC vs. national with trunk 0), or -1.
-     * For when Android's PhoneLookup misses because the phone's country does not
-     * match the numbers ("0170 …" vs. "+49 170 …"). Background thread.
+     * (Automation.sameNumber: same digits, or national vs. +CC of the phone's own
+     * country), or -1. For when Android's PhoneLookup misses ("0170 …" vs.
+     * "+49 170 …"). Background thread.
      */
-    static long idByNumber(ContentResolver cr, String number) {
+    static long idByNumber(Context ctx, String number) {
+        ContentResolver cr = ctx.getContentResolver();
+        Automation.Home home = home(ctx);
         java.util.List<Long> ids = new java.util.ArrayList<>();
         java.util.List<String> numbers = new java.util.ArrayList<>();
         String[] cols = { ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
@@ -461,7 +463,28 @@ final class Contacts {
         } catch (RuntimeException ignored) {
             return -1;
         }
-        int i = Automation.pickPhone(numbers, number);
+        int i = Automation.pickPhone(numbers, number, home);
         return i < 0 ? -1 : ids.get(i);
+    }
+
+    /**
+     * The phone's own country for Automation.sameNumber: where the phone is
+     * (network), else where its SIM is from; null if neither is known, and
+     * then a national number never matches an international one.
+     */
+    static Automation.Home home(Context c) {
+        String iso = null;
+        try {
+            android.telephony.TelephonyManager tm = c.getSystemService(android.telephony.TelephonyManager.class);
+            if (tm != null) {
+                iso = tm.getNetworkCountryIso();
+                if (iso == null || iso.isEmpty()) iso = tm.getSimCountryIso();
+            }
+        } catch (RuntimeException ignored) {
+            // no country: no cross-form matches
+        }
+        if (iso == null || iso.trim().isEmpty()) return null;
+        String region = iso.trim().toUpperCase(java.util.Locale.ROOT);
+        return n -> android.telephony.PhoneNumberUtils.formatNumberToE164(n, region);
     }
 }

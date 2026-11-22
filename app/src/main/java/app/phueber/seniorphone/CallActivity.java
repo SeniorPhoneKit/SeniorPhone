@@ -59,8 +59,6 @@ public final class CallActivity extends Activity implements CallService.Listener
     static final String EXTRA_SHOW_KEYPAD = "show_keypad";
     /** A keypad tap sends its tone this long. */
     private static final long DTMF_MS = 200;
-    /** Taps are ignored this long after a new screen appears. */
-    private static final long TOUCH_GUARD_MS = 700;
     /** After Answer/Decline, both are ignored this long unless the call changes. */
     private static final long CHOICE_LOCK_MS = 3000;
 
@@ -217,7 +215,7 @@ public final class CallActivity extends Activity implements CallService.Listener
     /** Opens or closes the keypad; taps on the new layout wait a moment, as on any new screen. */
     private void showKeypad(boolean open) {
         keypadOpen = open;
-        guardUntil = SystemClock.uptimeMillis() + TOUCH_GUARD_MS;
+        guardUntil = SystemClock.uptimeMillis() + Ui.TOUCH_GUARD_MS;
         render();
     }
 
@@ -250,7 +248,7 @@ public final class CallActivity extends Activity implements CallService.Listener
         if (intent != null && intent.getBooleanExtra(EXTRA_SHOW_KEYPAD, false)) {
             intent.removeExtra(EXTRA_SHOW_KEYPAD);
             keypadOpen = true;
-            guardUntil = SystemClock.uptimeMillis() + TOUCH_GUARD_MS;
+            guardUntil = SystemClock.uptimeMillis() + Ui.TOUCH_GUARD_MS;
         }
         if (intent == null || !ACTION_ANSWER.equals(intent.getAction())) return;
         CallService.answer(intent.getIntExtra(EXTRA_KEY, 0));
@@ -281,7 +279,7 @@ public final class CallActivity extends Activity implements CallService.Listener
                 // Calling -> connected keeps every button where it was (Hang up
                 // included), so a tap then is meant for that button: no guard.
                 if (!(p.key == shownKey && sameButtons(shownScreen, s))) {
-                    guardUntil = SystemClock.uptimeMillis() + TOUCH_GUARD_MS;
+                    guardUntil = SystemClock.uptimeMillis() + Ui.TOUCH_GUARD_MS;
                 }
                 choiceLockedUntil = 0;
             }

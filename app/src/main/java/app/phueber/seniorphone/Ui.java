@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
+import android.os.SystemClock;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -38,6 +39,12 @@ public final class Ui {
     public static final int TEXT_BUTTON = 22;
     public static final int TEXT_TITLE = 28;
     public static final int BUTTON_HEIGHT = 64;
+    /**
+     * Taps are ignored this long after a new screen or question appears, so a
+     * tap meant for what was there before never lands on it (the call screen's
+     * buttons, Yes in {@link #confirm}).
+     */
+    public static final long TOUCH_GUARD_MS = 700;
 
     private Ui() {}
 
@@ -281,24 +288,41 @@ public final class Ui {
         TextView q = bold(a, question, 24);
         q.setGravity(Gravity.CENTER);
         box.addView(q);
+        // Yes only counts once the question has been in front for TOUCH_GUARD_MS:
+        // another app may open this question (automation, a tel: link) right under
+        // the senior's finger, or cover it and step aside just before a tap. Taps
+        // through another app's window are dropped, and on 12+ other apps'
+        // overlays are hidden while it shows.
+        long[] armedAt = { Long.MAX_VALUE };
         Button yes = button(a, yesLabel, yesColorRes);
-        yes.setOnClickListener(v -> { d.dismiss(); onYes.run(); });
+        yes.setFilterTouchesWhenObscured(true);
+        yes.setOnClickListener(v -> {
+            if (SystemClock.uptimeMillis() - armedAt[0] < TOUCH_GUARD_MS) return;
+            d.dismiss();
+            onYes.run();
+        });
         box.addView(yes, fullWidth(a, 24));
         Button no = button(a, a.getString(R.string.cancel), R.color.blue);
+        no.setFilterTouchesWhenObscured(true);
         no.setOnClickListener(v -> d.dismiss());
         box.addView(no, fullWidth(a, 12));
 
         // Scrolls, so at a large font scale the buttons stay reachable.
         ScrollView sv = new ScrollView(a);
         sv.addView(box);
+        // The pause starts again whenever the question gets the focus back.
+        sv.getViewTreeObserver().addOnWindowFocusChangeListener(hasFocus ->
+                armedAt[0] = hasFocus ? SystemClock.uptimeMillis() : Long.MAX_VALUE);
         d.setContentView(sv);
         Window w = d.getWindow();
         if (w != null) {
             w.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             w.setLayout(a.getResources().getDisplayMetrics().widthPixels - dp(a, 32),
                     ViewGroup.LayoutParams.WRAP_CONTENT);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) w.setHideOverlayWindows(true);
         }
         d.show();
+        armedAt[0] = SystemClock.uptimeMillis();
         return d;
     }
 }

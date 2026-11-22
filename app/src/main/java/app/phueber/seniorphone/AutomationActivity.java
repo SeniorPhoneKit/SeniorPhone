@@ -54,8 +54,9 @@ public final class AutomationActivity extends Activity {
             boolean call = Automation.CALL.equals(action);
             ContentResolver cr = getContentResolver();
             boolean canRead = Contacts.canRead(this);
+            Automation.Home home = Contacts.home(this);
             Contacts.BACKGROUND.execute(() -> {
-                long id = !canRead ? -1 : number != null ? byNumber(cr, number) : byName(cr, name);
+                long id = !canRead ? -1 : number != null ? byNumber(cr, number, home) : byName(cr, name);
                 Contacts.MAIN.post(() -> open(target(call, id, number, name)));
             });
         }
@@ -113,7 +114,7 @@ public final class AutomationActivity extends Activity {
      * depends on the phone's country, so "0170 …" may miss a contact saved as
      * "+49 170 …": then the national / country-code comparison (Automation.pickPhone). Background thread.
      */
-    private static long byNumber(ContentResolver cr, String number) {
+    private static long byNumber(ContentResolver cr, String number, Automation.Home home) {
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
         try (Cursor c = cr.query(uri, new String[] { ContactsContract.PhoneLookup._ID }, null, null, null)) {
             if (c != null && c.moveToFirst()) return c.getLong(0);
@@ -132,7 +133,7 @@ public final class AutomationActivity extends Activity {
         } catch (RuntimeException e) {
             Log.w(TAG, "number scan", e);
         }
-        int i = Automation.pickPhone(numbers, number);
+        int i = Automation.pickPhone(numbers, number, home);
         return i < 0 ? -1 : ids.get(i);
     }
 

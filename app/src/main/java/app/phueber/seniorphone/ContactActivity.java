@@ -316,9 +316,10 @@ public final class ContactActivity extends Activity {
     }
 
     /**
-     * Automation asked to call: the question for the number it named (or, if
-     * that number is not one of the contact's, for the number as given), or
-     * for the only number. With several numbers and none named, the page
+     * Automation asked to call: the question for the number it named, or for
+     * the only number. A number that is not one of the contact's is asked by
+     * the number itself ("Call 0171 2345678?"), never by this contact's name:
+     * the name would vouch for a number that is not theirs. With several numbers and none named, the page
      * itself is the question: one Call button per number.
      */
     private void askRequestedCall(ContactInfo c) {
@@ -333,11 +334,12 @@ public final class ContactActivity extends Activity {
         }
         java.util.List<String> numbers = new java.util.ArrayList<>();
         for (ContactInfo.Phone ph : c.phones) numbers.add(ph.number);
-        int i = Automation.pickPhone(numbers, want);
-        if (i < 0) askCall(name, null, want);
+        int i = Automation.pickPhone(numbers, want, Contacts.home(this));
+        if (i < 0) askCall(want, null, want);
         else askCall(name, several ? typeLabel(c.phones.get(i)) : null, c.phones.get(i).number);
     }
 
+    /** "Call {who}?" (who: a name, or the number itself), then the call to number. */
     private void askCall(String name, String type, String number) {
         dismissDialog();
         if (Calls.busy(this)) return;

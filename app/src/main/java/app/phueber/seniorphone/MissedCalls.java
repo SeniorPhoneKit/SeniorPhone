@@ -30,24 +30,39 @@ import android.util.Log;
  * Opening it, Call back, or swiping it away tells Telecom the calls were
  * seen (cancelMissedCallsNotification), which also marks them read in the
  * call log. Count 0 from Telecom removes ours.
+ *
+ * Only our own notification may do that: this receiver is exported (for
+ * Telecom) but ignores ACTION_SEEN, which goes to the non-exported
+ * {@link Seen}; and the screens honour EXTRA_SEEN only when started through
+ * the non-exported aliases MissedCallDial / MissedCallList (or the
+ * non-exported ContactActivity), never from another app's intent.
  */
 public final class MissedCalls extends BroadcastReceiver {
     private static final String TAG = "MissedCalls";
     private static final String CHANNEL = "missed_calls";
     private static final int ID = 3; // CallNotifier uses 1 and 2
-    /** Our own: the notification was swiped away. */
+    /** Our own: the notification was swiped away (to {@link Seen} only). */
     static final String ACTION_SEEN = "app.phueber.seniorphone.MISSED_SEEN";
     /** On the screens a missed-call tap opens: the calls have been seen (boolean). */
     static final String EXTRA_SEEN = "missed_seen";
+    /** Non-exported aliases of DialActivity and ContactsActivity: only our notification starts them. */
+    private static final String ALIAS_DIAL = "app.phueber.seniorphone.MissedCallDial";
+    private static final String ALIAS_LIST = "app.phueber.seniorphone.MissedCallList";
+
+    /** The notification was swiped away. Not exported: no other app can clear our missed calls. */
+    public static final class Seen extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && ACTION_SEEN.equals(intent.getAction())) {
+                clearInTelecom(context.getApplicationContext());
+            }
+        }
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent != null ? intent.getAction() : null;
         Context app = context.getApplicationContext();
-        if (ACTION_SEEN.equals(action)) {
-            clearInTelecom(app);
-            return;
-        }
         if (!TelecomManager.ACTION_SHOW_MISSED_CALLS_NOTIFICATION.equals(action)) return;
         int count = intent.getIntExtra(TelecomManager.EXTRA_NOTIFICATION_COUNT, 0);
         if (count <= 0) {
@@ -102,7 +117,7 @@ public final class MissedCalls extends BroadcastReceiver {
                 Log.w(TAG, "contact lookup", e);
             }
             if (name == null) { // PhoneLookup depends on the phone's country; try our own rule
-                long id = Contacts.idByNumber(cr, number);
+                long id = Contacts.idByNumber(c, number);
                 ContactInfo info = id >= 0 ? Contacts.load(cr, id) : null;
                 if (info != null) {
                     name = info.name;
@@ -131,7 +146,7 @@ public final class MissedCalls extends BroadcastReceiver {
                 .setNumber(count)
                 .setContentIntent(open(c, contactId, number, false, 1))
                 .setDeleteIntent(PendingIntent.getBroadcast(c, 2,
-                        new Intent(c, MissedCalls.class).setAction(ACTION_SEEN), immutable()));
+                        new Intent(c, Seen.class).setAction(ACTION_SEEN), immutable()));
         if (android.os.Build.VERSION.SDK_INT >= 31) b.setCategory(Notification.CATEGORY_MISSED_CALL);
         if (number != null) {
             b.addAction(new Notification.Action.Builder(
@@ -155,21 +170,30 @@ public final class MissedCalls extends BroadcastReceiver {
         }
         Intent i;
         if (number != null) {
-            i = new Intent(c, DialActivity.class).setAction(Intent.ACTION_DIAL)
+            i = new Intent().setClassName(c, ALIAS_DIAL).setAction(Intent.ACTION_DIAL)
                     .setData(Uri.fromParts("tel", number, null))
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             if (ask) i.putExtra(DialActivity.EXTRA_ASK_CALL, true);
         } else {
-            i = new Intent(c, ContactsActivity.class);
+            i = new Intent().setClassName(c, ALIAS_LIST);
         }
         i.putExtra(EXTRA_SEEN, true).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return PendingIntent.getActivity(c, code, i, immutable());
     }
 
-    /** A screen opened from the notification: the missed calls have been seen. */
+    /**
+     * A screen opened from the notification: the missed calls have been seen.
+     * Only through a component no other app can start (an alias above, or the
+     * non-exported ContactActivity); DialActivity and ContactsActivity
+     * themselves are exported, so EXTRA_SEEN on them is ignored.
+     */
     static void seenFrom(Activity a, Intent intent) {
         if (intent == null || !intent.getBooleanExtra(EXTRA_SEEN, false)) return;
         intent.removeExtra(EXTRA_SEEN);
+        android.content.ComponentName cn = intent.getComponent();
+        String cls = cn != null && a.getPackageName().equals(cn.getPackageName()) ? cn.getClassName() : "";
+        if (!ALIAS_DIAL.equals(cls) && !ALIAS_LIST.equals(cls)
+                && !ContactActivity.class.getName().equals(cls)) return;
         cancel(a);
         clearInTelecom(a.getApplicationContext());
     }
