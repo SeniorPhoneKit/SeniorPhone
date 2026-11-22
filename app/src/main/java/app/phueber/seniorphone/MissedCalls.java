@@ -102,7 +102,7 @@ public final class MissedCalls extends BroadcastReceiver {
                 Log.w(TAG, "contact lookup", e);
             }
             if (name == null) { // PhoneLookup depends on the phone's country; try our own rule
-                long id = Contacts.idByNumber(cr, number);
+                long id = Contacts.idByNumber(c, number);
                 ContactInfo info = id >= 0 ? Contacts.load(cr, id) : null;
                 if (info != null) {
                     name = info.name;

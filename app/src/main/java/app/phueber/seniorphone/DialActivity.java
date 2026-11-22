@@ -55,6 +55,8 @@ public final class DialActivity extends Activity {
     private Button match;
     /** The address book's numbers, loaded in the background on every onResume; empty until then or without permission. */
     private java.util.List<DialMatch.Entry> book = new java.util.ArrayList<>();
+    /** The phone's country for "0171 …" = "+49 171 …" (Contacts.home), read with the book. */
+    private Automation.Home home;
     private Button delete;
     private Button call;
     private ToneGenerator tones;
@@ -456,6 +458,7 @@ public final class DialActivity extends Activity {
     private void loadBook() {
         if (!Contacts.canRead(this)) return;
         android.content.ContentResolver cr = getContentResolver();
+        Automation.Home h = Contacts.home(this);
         Contacts.BACKGROUND.execute(() -> {
             java.util.List<DialMatch.Entry> list = new java.util.ArrayList<>();
             String[] cols = { android.provider.ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
@@ -472,6 +475,7 @@ public final class DialActivity extends Activity {
             Contacts.MAIN.post(() -> {
                 if (isFinishing() || isDestroyed()) return;
                 book = list;
+                home = h;
                 showMatch();
             });
         });
@@ -483,7 +487,7 @@ public final class DialActivity extends Activity {
      */
     private void showMatch() {
         if (match == null) return;
-        DialMatch.Result r = DialMatch.match(book, number);
+        DialMatch.Result r = DialMatch.match(book, number, home);
         if (r == null) {
             match.setVisibility(View.GONE);
             match.setOnClickListener(null);

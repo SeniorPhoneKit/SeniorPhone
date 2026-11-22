@@ -771,7 +771,7 @@ public final class CallService extends InCallService {
                 }
                 if (name == null) { // PhoneLookup depends on the phone's country; try our own rule
                     try {
-                        long fid = Contacts.idByNumber(cr, n);
+                        long fid = Contacts.idByNumber(CallService.this, n);
                         ContactInfo info = fid >= 0 ? Contacts.load(cr, fid) : null;
                         if (info != null) {
                             name = info.name;

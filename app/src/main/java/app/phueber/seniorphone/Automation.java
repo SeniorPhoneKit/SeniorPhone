@@ -127,32 +127,46 @@ final class Automation {
     }
 
     /**
+     * The phone's own country, for reading a national number ("0171 2345678")
+     * as an international one. Android has no public way from a country to its
+     * calling code, so the caller passes PhoneNumberUtils.formatNumberToE164
+     * with the phone's country (Contacts.home); tests pass a fake.
+     */
+    interface Home {
+        /** The national number in E.164 ("+491712345678"), or null if it is not a valid one here. */
+        String e164(String national);
+    }
+
+    /**
      * Which of a contact's numbers is the given one: same digits, or the same
      * number written once with a country code and once nationally ("+49 171
-     * 2345678" is "0171 2345678", see {@link #sameNumber}); -1 if none.
+     * 2345678" is "0171 2345678" in Germany, see {@link #sameNumber}); -1 if none.
      */
-    static int pickPhone(List<String> numbers, String number) {
+    static int pickPhone(List<String> numbers, String number, Home home) {
         String want = digits(number);
         if (want.length() == 0 || numbers == null) return -1;
         for (int i = 0; i < numbers.size(); i++) {
             if (digits(numbers.get(i)).equals(want)) return i;
         }
         for (int i = 0; i < numbers.size(); i++) {
-            if (sameNumber(numbers.get(i), number)) return i;
+            if (sameNumber(numbers.get(i), number, home)) return i;
         }
         return -1;
     }
 
     /**
-     * Whether two numbers are the same one, one with a country code ("+49 …" or
-     * "0049 …") and one in national form: the national number without its
-     * trunk 0 equals the international one without a 1-3 digit country code
-     * (a "(0)" after the country code is ignored). Two international or two
-     * national numbers must have the same digits ("+" and "00" alike): "+49 30 12345678" and
-     * "+49 40 12345678" end alike but are different people. National numbers
-     * shorter than 6 digits never match.
+     * Whether two numbers are the same one. Same digits always are. Two
+     * international numbers ("+" and "00" alike, a "(0)" after the country
+     * code ignored) must have the same digits, country code included:
+     * "+49 30 12345678" and "+49 40 12345678" end alike but are different
+     * people. A national number matches an international one only as a
+     * number of the phone's own country (home): "0171 2345678" is
+     * "+49 171 2345678" on a German phone, but never "+43 171 2345678",
+     * which would otherwise borrow a German contact's name and picture for
+     * a caller from abroad. Without a home country, or for national numbers
+     * shorter than 6 digits, the two forms never match.
      */
-    static boolean sameNumber(String a, String b) {
+    static boolean sameNumber(String a, String b, Home home) {
         String da = digits(a), db = digits(b);
         if (da.isEmpty()) return false;
         if (da.equals(db)) return true;
@@ -160,22 +174,24 @@ final class Automation {
         if (ia != null && ib != null) return ia.equals(ib); // "+49 …" is "0049 …"
         if (ia == null && ib == null) return false;
         String intl = ia != null ? ia : ib;
-        String nat = ia != null ? db : da;
-        if (nat.length() < 6) return false;
-        String natRest = nat.startsWith("0") ? nat.substring(1) : nat;
-        for (int cc = 1; cc <= 3 && cc < intl.length(); cc++) {
-            String rest = intl.substring(cc);
-            if (rest.startsWith("0")) rest = rest.substring(1); // "+49 (0)171 …"
-            if (rest.equals(natRest)) return true;
+        String nat = ia != null ? b : a;
+        if (home == null || digits(nat).length() < 6) return false;
+        String e;
+        try {
+            e = international(home.e164(nat));
+        } catch (RuntimeException ex) {
+            return false;
         }
-        return false;
+        return e != null && !e.isEmpty() && e.equals(intl);
     }
 
-    /** The digits after "+" or "00", or null for a national number. */
+    /** The digits after "+" or "00" (without a "(0)" after it), or null for a national number. */
     private static String international(String s) {
-        String d = digits(s);
-        if (s != null && s.trim().startsWith("+")) return d;
-        return d.startsWith("00") ? d.substring(2) : null;
+        if (s == null) return null;
+        String t = s.trim();
+        if (t.startsWith("+")) return digits(t.replaceFirst("\\(\\s*0\\s*\\)", ""));
+        String d = digits(t);
+        return d.startsWith("00") ? digits(t.replaceFirst("\\(\\s*0\\s*\\)", "")).substring(2) : null;
     }
 
     private static String digits(String s) {

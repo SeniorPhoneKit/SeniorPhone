@@ -334,7 +334,7 @@ public final class ContactActivity extends Activity {
         }
         java.util.List<String> numbers = new java.util.ArrayList<>();
         for (ContactInfo.Phone ph : c.phones) numbers.add(ph.number);
-        int i = Automation.pickPhone(numbers, want);
+        int i = Automation.pickPhone(numbers, want, Contacts.home(this));
         if (i < 0) askCall(want, null, want);
         else askCall(name, several ? typeLabel(c.phones.get(i)) : null, c.phones.get(i).number);
     }

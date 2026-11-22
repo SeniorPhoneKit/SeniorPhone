@@ -27,7 +27,7 @@ colour theme (`Store`).
 | `Contacts` | Address-book access on one background thread (so a star or a delete always finishes before the reload after it). |
 | `ContactInfo`, `ContactList`, `ContactForm` | Pure: the contact value, sorting and sections (Ä under A, Favourites first), search key, form rules. Unit tested. |
 | `DialActivity` | The number pad; also what other apps open for "dial this number". A number from outside (tel: link, automation) with `*` or `#` is refused and the pad opens empty: it is an MMI/USSD code ("**21*…#" forwards every call), not a number. Codes typed on the pad work as always. |
-| `DialMatch` | Pure: whose number is being typed. Same number (same digits, or national vs. country-code form, `Automation.sameNumber`) gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
+| `DialMatch` | Pure: whose number is being typed. Same number (same digits, or national vs. country-code form of the phone's own country, `Automation.sameNumber`) gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
 | `DialNumber` | Pure: what may be typed and how a number from another app is cleaned (`clean`) or refused when it is a code (`fromOutside`). Unit tested. |
 | `Calls` | `place()`: places a call through Telecom, asking for the call permission if needed; refused (a call is already on: `busy()`) or failed, it says so. |
 | `CallBanner` | The green "Back to the call" on the list, the pad and a contact page; follows `CallService` while the screen is started. |
@@ -44,7 +44,7 @@ colour theme (`Store`).
 | `Store` | Own lock flag with PIN salt/hash, and theme, in device-protected storage (direct boot); `locked()` is the launcher's lock or our own; `unlock(pin)` lifts both; the reset PIN (`Pin.RESET`) works for either. |
 | `LauncherLock` | Reads SeniorLauncher's lock, and lifts it with its PIN; when the launcher cannot answer, the last known value is used (while it is installed). |
 | `Pin` | PIN validation, salted hash, constant-time compare, and the fixed reset PIN. Same as SeniorAlert's. Pure. |
-| `Automation` | Pure: the automation actions and extras, lenient parsing of the string extras, which contact a name means and which of its numbers a number is (`sameNumber`). Unit tested. |
+| `Automation` | Pure: the automation actions and extras, lenient parsing of the string extras, which contact a name means and which of its numbers a number is (`sameNumber`). Unit tested. The phone's country comes in as `Automation.Home` (`Contacts.home`: network country, else SIM country, through `PhoneNumberUtils.formatNumberToE164`; Android has no public country-to-calling-code table). |
 | `AutomationActivity` | Invisible trampoline for CALL, OPEN_CONTACT, OPEN_DIALPAD, OPEN_CONTACTS: finds the contact off the main thread, opens the page / pad / list, closes. Never calls. |
 | `AutomationReceiver` | Broadcasts LOCK, UNLOCK, SET_THEME, through `Store` on a background thread (goAsync). |
 | `CallControlReceiver` | Broadcasts ANSWER, HANG_UP, SPEAKER, LOUDER through `CallService`, guarded by ANSWER_PHONE_CALLS. |
@@ -135,8 +135,14 @@ what a command may do:
   the list searched for it. A number is looked up with Android's PhoneLookup,
   then by `Automation.pickPhone` (PhoneLookup depends on the phone's
   country): same digits, or one number with a country code and the other
-  national, equal after the trunk 0. Never by a shared ending alone:
-  +49 30 12345678 and +49 40 12345678 are different people. When the page
+  national, where the national one, read as a number of the phone's own
+  country (network, else SIM), is the international one. Never by a shared
+  ending alone: +49 30 12345678 and +49 40 12345678 are different people;
+  and never across countries: on a German phone "+43 171 2345678" is not the
+  contact saved as "0171 2345678", or a caller from abroad would get that
+  contact's name and picture on the call screen. Country unknown: only same
+  digits match. The call screen and the missed-call notification use the
+  same rule when PhoneLookup misses (`Contacts.idByNumber`). When the page
   found has no such number (PhoneLookup is looser than our rule), the
   question names the number, not the person: "Call 0171 2345678?".
   A contact page is opened over a fresh contact list
