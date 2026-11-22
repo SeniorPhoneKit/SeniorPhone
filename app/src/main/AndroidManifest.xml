@@ -163,6 +163,22 @@
                 <action android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
             </intent-filter>
         </receiver>
+        <!-- The missed-call notification swiped away: clears the missed calls in
+             Telecom, so only our own notification may send it. -->
+        <receiver
+            android:name=".MissedCalls$Seen"
+            android:exported="false" />
+        <!-- What a missed-call tap opens when the caller is no contact: the pad or
+             the list, through these aliases so that only our notification (never
+             another app) can mark the missed calls as seen (MissedCalls.seenFrom). -->
+        <activity-alias
+            android:name=".MissedCallDial"
+            android:exported="false"
+            android:targetActivity=".DialActivity" />
+        <activity-alias
+            android:name=".MissedCallList"
+            android:exported="false"
+            android:targetActivity=".ContactsActivity" />
 
         <!-- Automation (Trigly, Tasker, ...): see Automation.java. Screens that must
              appear: an invisible trampoline that never places a call, only asks
