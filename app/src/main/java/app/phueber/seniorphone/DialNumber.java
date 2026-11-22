@@ -70,6 +70,18 @@ final class DialNumber {
         return out.toString();
     }
 
+    /**
+     * A number from outside the app (a tel: link, automation): cleaned like
+     * {@link #clean}, but "" if it contains * or #. Those make it a network
+     * code (MMI/USSD) rather than a number: "**21*0171…#" forwards every call,
+     * one tap on Call away. Dropping just the * and # would leave a different
+     * number, so the whole thing is refused. Codes typed on the pad still work.
+     */
+    static String fromOutside(String raw) {
+        String n = clean(raw);
+        return n.indexOf('*') >= 0 || n.indexOf('#') >= 0 ? "" : n;
+    }
+
     /** Call is allowed once the number has at least one digit ("+" or "*" alone is not a number). */
     static boolean canCall(String number) {
         if (number == null) return false;

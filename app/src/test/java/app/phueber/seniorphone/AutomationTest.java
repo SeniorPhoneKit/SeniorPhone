@@ -52,6 +52,8 @@ public class AutomationTest {
         assertNull(Automation.parseNumber("+"));
         assertNull(Automation.parseNumber("abc"));
         assertNull(Automation.parseNumber(null));
+        assertNull(Automation.parseNumber("**21*01711234567#")); // a code, not a number
+        assertNull(Automation.parseNumber("*100#"));
     }
 
     @Test public void names() {

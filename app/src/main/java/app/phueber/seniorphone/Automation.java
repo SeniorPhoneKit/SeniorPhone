@@ -87,9 +87,9 @@ final class Automation {
         }
     }
 
-    /** A number to dial, cleaned like one from another app; null if it has no digit. */
+    /** A number to dial, cleaned like one from another app; null if it has no digit or is a code with * or #. */
     static String parseNumber(String s) {
-        String n = DialNumber.clean(s == null ? null : s.trim());
+        String n = DialNumber.fromOutside(s == null ? null : s.trim());
         return DialNumber.canCall(n) ? n : null;
     }
 

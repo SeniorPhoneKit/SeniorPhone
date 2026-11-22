@@ -69,7 +69,7 @@ public final class DialActivity extends Activity {
         store = new Store(this);
         number = savedInstanceState != null
                 ? DialNumber.clean(savedInstanceState.getString(STATE_NUMBER, ""))
-                : fromIntent(getIntent());
+                : orEmpty(fromIntent(getIntent()));
         setContentView(build());
         update();
         // The Phone icon is a front door of its own, so the role question belongs here too.
@@ -85,11 +85,15 @@ public final class DialActivity extends Activity {
         }
     }
 
-    /** Automation asked to call the number it typed in: the question, never the call itself. */
+    /**
+     * Automation asked to call the number it handed over: the question, never
+     * the call itself. Only for that number, never for one typed earlier.
+     */
     private void askRequestedCall(Intent in) {
         if (in == null || !in.getBooleanExtra(EXTRA_ASK_CALL, false)) return;
         in.removeExtra(EXTRA_ASK_CALL);
-        if (!DialNumber.canCall(number)) return;
+        String asked = fromIntent(in);
+        if (asked == null || !asked.equals(number) || !DialNumber.canCall(number)) return;
         if (callDialog != null && callDialog.isShowing()) callDialog.dismiss();
         if (Calls.busy(this)) return;
         String n = number;
@@ -109,7 +113,7 @@ public final class DialActivity extends Activity {
         super.onNewIntent(intent);
         setIntent(intent);
         String n = fromIntent(intent);
-        if (!n.isEmpty()) {
+        if (n != null) { // a refused code leaves the pad empty, not with what was typed before
             number = n;
             update();
         }
@@ -210,11 +214,19 @@ public final class DialActivity extends Activity {
         }
     }
 
-    /** The number in a "tel:" link from another app, cleaned; "" if there is none. */
+    /**
+     * The number in a "tel:" link from another app, cleaned; null without one,
+     * "" if it is empty or a code with * or # (DialNumber.fromOutside): a link
+     * on a web page must not put "**21*…#" (forward all calls) one tap away.
+     */
     private static String fromIntent(Intent i) {
         Uri data = i == null ? null : i.getData();
-        if (data == null || !"tel".equalsIgnoreCase(data.getScheme())) return "";
-        return DialNumber.clean(data.getSchemeSpecificPart());
+        if (data == null || !"tel".equalsIgnoreCase(data.getScheme())) return null;
+        return DialNumber.fromOutside(data.getSchemeSpecificPart());
+    }
+
+    private static String orEmpty(String s) {
+        return s == null ? "" : s;
     }
 
     private View build() {

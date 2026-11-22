@@ -48,6 +48,19 @@ public class DialNumberTest {
         assertEquals("*21#", DialNumber.clean("*21#"));
     }
 
+    @Test public void outsideNumbersWithACodeAreRefused() {
+        // A tel: link or automation must not put an MMI/USSD code one tap away.
+        assertEquals("", DialNumber.fromOutside("**21*01711234567#"));
+        assertEquals("", DialNumber.fromOutside("*#06#"));
+        assertEquals("", DialNumber.fromOutside("0171 1234#"));
+        assertEquals("", DialNumber.fromOutside(null));
+        // Refused whole, never stripped into a different number.
+        assertEquals("", DialNumber.fromOutside("*21*0171234567"));
+        // Ordinary numbers are cleaned as before; what follows a pause never counts.
+        assertEquals("+4917112345", DialNumber.fromOutside("+49 (171) 123-45"));
+        assertEquals("0301234", DialNumber.fromOutside("0301234,*21#"));
+    }
+
     @Test public void cleanKeepsOnlyALeadingPlus() {
         assertEquals("+4930", DialNumber.clean(" +49+30"));
         assertEquals("4930", DialNumber.clean("49+30"));

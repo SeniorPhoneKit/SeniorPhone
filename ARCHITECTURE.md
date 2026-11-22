@@ -26,9 +26,9 @@ colour theme (`Store`).
 | `EditContactActivity` | Our own simple form: first name, last name, one number. Not available when locked. |
 | `Contacts` | Address-book access on one background thread (so a star or a delete always finishes before the reload after it). |
 | `ContactInfo`, `ContactList`, `ContactForm` | Pure: the contact value, sorting and sections (Ä under A, Favourites first), search key, form rules. Unit tested. |
-| `DialActivity` | The number pad; also what other apps open for "dial this number". |
+| `DialActivity` | The number pad; also what other apps open for "dial this number". A number from outside (tel: link, automation) with `*` or `#` is refused and the pad opens empty: it is an MMI/USSD code ("**21*…#" forwards every call), not a number. Codes typed on the pad work as always. |
 | `DialMatch` | Pure: whose number is being typed. Same number (same digits, or national vs. country-code form, `Automation.sameNumber`) gives "✓ Name" (plain text); otherwise, from 4 digits on, the one contact whose number starts like that (also in national form of a +CC number) is offered as "Name? Tap for …", which fills it in. Several candidates: nothing shown. Unit tested. |
-| `DialNumber` | Pure: what may be typed and how a number from another app is cleaned. Unit tested. |
+| `DialNumber` | Pure: what may be typed and how a number from another app is cleaned (`clean`) or refused when it is a code (`fromOutside`). Unit tested. |
 | `Calls` | `place()`: places a call through Telecom, asking for the call permission if needed; refused (a call is already on: `busy()`) or failed, it says so. |
 | `CallBanner` | The green "Back to the call" on the list, the pad and a contact page; follows `CallService` while the screen is started. |
 | `CallService` | The `InCallService` Telecom binds while there is a call. The only owner of call state; answer, decline, hang up, speaker, mute, keypad tones (DTMF). |
