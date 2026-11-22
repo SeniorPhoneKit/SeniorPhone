@@ -39,7 +39,7 @@ colour theme (`Store`).
 | `CallState` | Pure: Telecom states to screens, which call gets the screen (never a conference participant: the conference call does, so Hang up ends all of it), why a call ended, the timer text. Unit tested. |
 | `Role` | Asks once per start to become the phone app; Settings shows the state. |
 | `SettingsActivity` | Lock (choose a PIN), Colours, Phone app, phone settings. |
-| `Ui`, `Palette` | Copied from SeniorLauncher: shared buttons, screens and dialogs; the four colour themes, contrast-tested. |
+| `Ui`, `Palette` | Copied from SeniorLauncher: shared buttons, screens and dialogs; the four colour themes, contrast-tested. `Ui.confirm` (every "Call X?") ignores Yes until it has been in front for 0.7 s (again after it gets the focus back), drops taps through another app's window (`filterTouchesWhenObscured`) and, on 12+, hides other apps' overlays while it shows (`HIDE_OVERLAY_WINDOWS`): another app can open the question, so it must not be able to time or disguise the tap on Yes. |
 | `NavBar` | Whether SeniorNav's Back & Home bar is visible: SeniorNav's read-only provider `content://app.phueber.seniornav.bar/state` (column `visible`, also 0 while automation pauses the bar), observed live while the Back button is attached; without that provider, whether its accessibility service is enabled. While the bar shows, the pinned Back button is hidden, since the bar already has Back and Home; also re-checked whenever a screen gets focus. Pure part unit tested. |
 | `Store` | Own lock flag with PIN salt/hash, and theme, in device-protected storage (direct boot); `locked()` is the launcher's lock or our own; `unlock(pin)` lifts both; the reset PIN (`Pin.RESET`) works for either. |
 | `LauncherLock` | Reads SeniorLauncher's lock, and lifts it with its PIN; when the launcher cannot answer, the last known value is used (while it is installed). |
@@ -77,7 +77,7 @@ This is the part that must never fail.
   with its normal ringtone and volume.
 - Answer is huge and on top, Decline smaller and below: declining by mistake
   is worse than answering by mistake, and stacked buttons cannot be hit by a
-  sideways slip. New screens ignore taps for 0.7 s, so a tap meant for what
+  sideways slip. New screens ignore taps for 0.7 s (`Ui.TOUCH_GUARD_MS`), so a tap meant for what
   was there before never lands on Hang up. Calling and connected have the
   same buttons in the same places, so the other side answering does not
   restart that pause.
