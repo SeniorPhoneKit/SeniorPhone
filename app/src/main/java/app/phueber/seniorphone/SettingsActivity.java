@@ -1,7 +1,10 @@
 package app.phueber.seniorphone;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +22,9 @@ import android.widget.TextView;
  */
 public final class SettingsActivity extends Activity {
     private static final String STATE_DECLINED = "declined";
+    private static final String STATE_RESULT = "backup_result";
+    private static final int REQUEST_SAVE = 41;
+    private static final int REQUEST_LOAD = 42;
 
     private Store store;
     private android.app.Dialog dialog;
@@ -26,13 +32,19 @@ public final class SettingsActivity extends Activity {
     private LinearLayout phoneApp;
     /** Android's question came back without "yes": also offer the default-apps page. */
     private boolean declined;
+    /** The Backup section; hidden while locked, like the rest of Settings' changes. */
+    private LinearLayout backup;
+    /** A restore's result, shown once the screen is rebuilt in the restored colours. */
+    private String pendingResult;
+    private Palette.Theme builtTheme;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Ui.applyTheme(this);
+        builtTheme = Ui.applyTheme(this);
         store = new Store(this);
         declined = savedInstanceState != null && savedInstanceState.getBoolean(STATE_DECLINED);
+        pendingResult = savedInstanceState == null ? null : savedInstanceState.getString(STATE_RESULT);
         LinearLayout content = Ui.screen(this, getString(R.string.settings_title));
 
         if (LauncherLock.present(this)) {
@@ -93,11 +105,131 @@ public final class SettingsActivity extends Activity {
         });
         content.addView(phone, Ui.fullWidth(this, 36));
         content.addView(explanation(getString(R.string.settings_phone_explain)), Ui.fullWidth(this, 8));
+
+        // Backup: the settings to a file and back (PhoneSettingsBackup), through
+        // the system's file picker. Never while locked.
+        backup = new LinearLayout(this);
+        backup.setOrientation(LinearLayout.VERTICAL);
+        backup.addView(heading(getString(R.string.backup_title)), Ui.fullWidth(this, 0));
+        Button save = Ui.button(this, getString(R.string.backup_save), R.color.blue);
+        save.setOnClickListener(v -> pick(BackupFiles.saveIntent(
+                Backup.fileName(getString(R.string.backup_app_name), BackupFiles.today())), REQUEST_SAVE));
+        backup.addView(save, Ui.fullWidth(this, 8));
+        Button load = Ui.button(this, getString(R.string.backup_load), R.color.blue);
+        load.setOnClickListener(v -> pick(BackupFiles.openIntent(), REQUEST_LOAD));
+        backup.addView(load, Ui.fullWidth(this, 8));
+        backup.addView(explanation(getString(R.string.backup_explain)), Ui.fullWidth(this, 8));
+        content.addView(backup, Ui.fullWidth(this, 36));
+    }
+
+    private void pick(Intent intent, int request) {
+        if (store.locked()) {
+            showBackup();
+            return;
+        }
+        try {
+            startActivityForResult(intent, request);
+        } catch (ActivityNotFoundException e) {
+            show(getString(R.string.backup_no_picker));
+        }
+    }
+
+    private void showBackup() {
+        if (backup != null) backup.setVisibility(store.locked() ? View.GONE : View.VISIBLE);
+    }
+
+    private void show(CharSequence text) {
+        dismissDialog();
+        dialog = Ui.message(this, text);
+    }
+
+    /** Writes the file off the main thread (contacts are read for it). */
+    private void save(Uri uri) {
+        Context app = getApplicationContext();
+        Contacts.BACKGROUND.execute(() -> {
+            boolean ok;
+            try {
+                BackupFiles.write(app, uri, PhoneSettingsBackup.export(app));
+                ok = true;
+            } catch (Exception e) {
+                ok = false;
+            }
+            boolean saved = ok;
+            Contacts.MAIN.post(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    show(getString(saved ? R.string.backup_saved : R.string.backup_error_save));
+                }
+            });
+        });
+    }
+
+    /** Reads the file, asks, then restores; nothing changes before the Replace. */
+    private void load(Uri uri) {
+        Context app = getApplicationContext();
+        Contacts.BACKGROUND.execute(() -> {
+            String json;
+            String problem = null;
+            try {
+                json = BackupFiles.read(app, uri);
+                Backup.settingsFor(json, app.getPackageName());
+            } catch (Backup.Failure f) {
+                json = null;
+                problem = PhoneSettingsBackup.errorText(app, f.code);
+            } catch (Exception e) {
+                json = null;
+                problem = app.getString(R.string.backup_error_read);
+            }
+            String file = json, error = problem;
+            Contacts.MAIN.post(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                if (error != null) {
+                    show(error);
+                    return;
+                }
+                dismissDialog();
+                dialog = Ui.confirm(this, getString(R.string.backup_confirm),
+                        getString(R.string.backup_replace), R.color.red, () -> restore(file));
+            });
+        });
+    }
+
+    private void restore(String json) {
+        if (store.locked()) {
+            showBackup();
+            return;
+        }
+        Context app = getApplicationContext();
+        Contacts.BACKGROUND.execute(() -> {
+            PhoneSettingsBackup.Result r = PhoneSettingsBackup.restore(app, json);
+            Contacts.MAIN.post(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                if (r.error != null) {
+                    show(PhoneSettingsBackup.errorText(this, r.error));
+                    return;
+                }
+                String text = getString(R.string.backup_restored);
+                if (!r.skipped.isEmpty()) {
+                    text += "\n" + getString(R.string.backup_not_found, String.join(", ", r.skipped));
+                }
+                if (builtTheme != store.theme()) {
+                    // The new colours: rebuild, then tell the helper on the new screen.
+                    pendingResult = text;
+                    recreate();
+                } else {
+                    show(text);
+                }
+            });
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        showBackup();
+        if (pendingResult != null) {
+            show(pendingResult);
+            pendingResult = null;
+        }
         showPhoneApp(); // also after coming back from Android's question or the default-apps page
     }
 
@@ -118,11 +250,23 @@ public final class SettingsActivity extends Activity {
     protected void onSaveInstanceState(Bundle out) {
         super.onSaveInstanceState(out);
         out.putBoolean(STATE_DECLINED, declined);
+        if (pendingResult != null) out.putString(STATE_RESULT, pendingResult);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_SAVE || requestCode == REQUEST_LOAD) {
+            Uri uri = data == null ? null : data.getData();
+            if (resultCode != RESULT_OK || uri == null) return; // the helper cancelled
+            if (store.locked()) { // locked while the picker was open
+                showBackup();
+                return;
+            }
+            if (requestCode == REQUEST_SAVE) save(uri);
+            else load(uri);
+            return;
+        }
         if (requestCode != Role.REQUEST_CODE) return;
         // Android 10+ stops showing its question after two "no"s and answers
         // at once; then the default-apps page is the only way left.

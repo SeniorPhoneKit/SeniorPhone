@@ -62,6 +62,19 @@ Needs Android 8.0 or newer and a phone with a SIM card.
   the padlock to unlock. Forgotten PIN: the reset PIN **506614** always opens
   the lock.
 
+## Backup (for the helper)
+
+**Settings → Backup → Save settings to a file** keeps the colours and the
+favourites in a file you choose (Downloads, Google Drive, …).
+**Load settings from a file** puts them back, after a reset or on a new
+phone: it asks "Replace the current settings with the ones from the file?"
+first. Favourites are saved as name and phone numbers, not the contacts
+themselves: on the new phone the contacts must already be there (e.g. from
+the Google account). Each favourite is found by its number, else by its name;
+whoever is not found is listed ("Not found on this phone: …"). The lock is
+not saved and not changed. Only while unlocked. With SeniorLauncher, its
+Settings can save and load all Senior apps at once.
+
 ## Widgets on the home screen
 
 - **Call** (one person): one tile with a person's picture and first name.
@@ -108,6 +121,10 @@ one contact's name.
 Example (Trigly, action "Fire an intent"): send mode **Broadcast**, package
 `app.phueber.seniorphone`, action `app.phueber.seniorphone.action.SET_THEME`,
 extra `theme` = `dark` — e.g. at sunset.
+
+The settings backup has no automation command: saving and loading go
+through the file picker, where the helper chooses the file, and a restore
+replaces the settings only after a confirm.
 
 ## SeniorPhone (Deutsch)
 
@@ -169,6 +186,21 @@ Benötigt Android 8.0 oder neuer und ein Telefon mit SIM-Karte.
   das Schloss gedrückt halten. PIN vergessen: die Reset-PIN **506614** öffnet
   die Sperre immer.
 
+### Sicherung (für Helfer)
+
+**Einstellungen → Sicherung → Einstellungen in eine Datei speichern** legt
+die Farben und die Favoriten in einer Datei ab, die Sie wählen (Downloads,
+Google Drive, …). **Einstellungen aus einer Datei laden** holt sie zurück,
+nach einem Zurücksetzen oder auf einem neuen Telefon; vorher kommt die Frage
+„Die aktuellen Einstellungen durch die aus der Datei ersetzen?“. Favoriten
+werden mit Name und Telefonnummern gespeichert, nicht die Kontakte selbst: Auf
+dem neuen Telefon müssen die Kontakte schon da sein (z. B. aus dem
+Google-Konto). Jeder Favorit wird über seine Nummer gefunden, sonst über den
+Namen; wer nicht gefunden wird, steht in der Meldung („Auf diesem Telefon
+nicht gefunden: …“). Die Sperre wird weder gespeichert noch geändert. Nur im
+entsperrten Zustand. Mit SeniorLauncher lassen sich in dessen Einstellungen
+alle Senior-Apps auf einmal sichern und laden.
+
 ### Widgets auf der Startseite
 
 - **Anrufen** (eine Person): eine Kachel mit Bild und Vorname einer Person.
@@ -218,6 +250,11 @@ Kontakt.
 Beispiel (Trigly, Aktion „Intent senden“): Sendeart **Broadcast**, Paket
 `app.phueber.seniorphone`, Aktion `app.phueber.seniorphone.action.SET_THEME`,
 Extra `theme` = `dark` – z. B. bei Sonnenuntergang.
+
+Für die Sicherung der Einstellungen gibt es keinen Automatisierungsbefehl:
+Speichern und Laden gehen über die Dateiauswahl, in der der Helfer die Datei
+wählt, und eine Wiederherstellung ersetzt die Einstellungen erst nach einer
+Rückfrage.
 
 ## Contributing
 

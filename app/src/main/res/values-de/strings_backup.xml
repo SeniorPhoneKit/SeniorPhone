@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_title">Sicherung</string>
+    <string name="backup_save">Einstellungen in eine Datei speichern</string>
+    <string name="backup_load">Einstellungen aus einer Datei laden</string>
+    <string name="backup_explain">Bewahrt die Einstellungen dieser App in einer Datei auf, die Sie wählen, zum Beispiel unter Downloads oder in Google Drive. Laden Sie die Datei nach einem Zurücksetzen oder auf einem neuen Telefon wieder. Favoriten werden mit Name und Nummer gespeichert, die Kontakte selbst nicht.</string>
+    <string name="backup_confirm">Die aktuellen Einstellungen durch die aus der Datei ersetzen?</string>
+    <string name="backup_replace">Ersetzen</string>
+    <string name="backup_saved">Gespeichert.</string>
+    <string name="backup_restored">Wiederhergestellt.</string>
+    <string name="backup_not_found">Auf diesem Telefon nicht gefunden: %1$s</string>
+    <string name="backup_ok">OK</string>
+    <string name="backup_error_malformed">Diese Datei ist keine lesbare Einstellungsdatei. Es wurde nichts geändert.</string>
+    <string name="backup_error_newer">Diese Datei stammt von einer neueren Version der App. Bitte aktualisieren Sie zuerst die App. Es wurde nichts geändert.</string>
+    <string name="backup_error_no_entry">Diese Datei enthält keine Einstellungen für %1$s. Es wurde nichts geändert.</string>
+    <string name="backup_error_locked">Das Telefon ist gesperrt. Es wurde nichts geändert.</string>
+    <string name="backup_error_no_contacts">Die App darf keine Kontakte ändern, daher können die Favoriten nicht wiederhergestellt werden. Bitte erlauben Sie zuerst den Zugriff auf Kontakte. Es wurde nichts geändert.</string>
+    <string name="backup_error_read">Die Datei konnte nicht gelesen werden. Es wurde nichts geändert.</string>
+    <string name="backup_error_save">Die Datei konnte nicht gespeichert werden.</string>
+    <string name="backup_no_picker">Dieses Telefon kann keine Dateien auswählen.</string>
+</resources>

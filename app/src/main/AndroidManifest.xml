@@ -268,5 +268,13 @@
                 <action android:name="app.phueber.seniorphone.action.LOUDER" />
             </intent-filter>
         </receiver>
+        <!-- The settings backup for SeniorLauncher's "all Senior apps" (export,
+             import). Exported without a permission: the apps have separate
+             signing keys; BackupProvider answers only SeniorLauncher and this app. -->
+        <provider
+            android:name=".BackupProvider"
+            android:authorities="app.phueber.seniorphone.backup"
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" />
     </application>
 </manifest>
