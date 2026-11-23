@@ -14,6 +14,12 @@ number pad, **Contacts** (blue address book) opens the contact list.
 
 ## What you see
 
+<p>
+  <img src="docs/screenshots/contacts.png" width="30%" alt="Contacts: Number pad and search at the top, favourites first, then A to Z in large names">
+  <img src="docs/screenshots/number-pad.png" width="30%" alt="Number pad: the typed number in big digits, the matching contact's name under it, big keys and a green Call button">
+  <img src="docs/screenshots/incoming-call.png" width="30%" alt="Incoming call: the caller's name and number, a huge green Answer button and a red Decline button">
+</p>
+
 - **Contacts**: your favourites first, then everyone from A to Z, in large
   letters. Search by name.
 - Tap a person: their picture, name and a big green **Call**. The phone asks
