@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The full steps, shown only when the helper taps "How? Show the steps" (Steps).
+         Each step names what to tap in the words Android shows. -->
+    <string name="steps_button">How? Show the steps</string>
+
+    <string name="steps_role_title">Make “Phone” the phone app</string>
+    <string-array name="steps_role">
+        <item>Tap “Make this the phone app” below.</item>
+        <item>Android asks “Set Phone as your default phone app?”: tap the “Phone” that is not marked “Current default”, then “Set as default”.</item>
+        <item>Come back here: it says “This is the phone app ✓”.</item>
+    </string-array>
+    <string-array name="steps_role_notes">
+        <item>Android does not ask any more (after “No” twice)? Tap “Choose in the phone’s settings” below, then “Phone app”, and choose this app “Phone”.</item>
+        <item>Samsung: under “Apps”, “Choose default apps”, “Phone app”.</item>
+    </string-array>
+
+    <string name="steps_contacts_title">Allow access to contacts</string>
+    <string-array name="steps_contacts">
+        <item>Tap “Open settings” below.</item>
+        <item>Tap “Permissions”.</item>
+        <item>Tap “Contacts”.</item>
+        <item>Tap “Allow”.</item>
+        <item>Come back with Back: the contacts appear.</item>
+    </string-array>
+</resources>

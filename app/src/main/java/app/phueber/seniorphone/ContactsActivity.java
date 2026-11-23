@@ -95,6 +95,7 @@ public final class ContactsActivity extends Activity {
     private LinearLayout permissionPanel;
     private TextView permissionText;
     private Button permissionButton;
+    private Button permissionSteps;
     private Button newContact;
 
     /** Sorted contacts of the last load; the search filters these without reloading. */
@@ -346,6 +347,11 @@ public final class ContactsActivity extends Activity {
             }
         });
         box.addView(permissionButton, Ui.fullWidth(this, 24));
+        // Only when Android no longer asks and the permission is in the phone settings.
+        permissionSteps = Steps.button(this, R.string.steps_contacts_title, R.array.steps_contacts,
+                0, new Steps.Action(R.string.contacts_permission_settings,
+                        this::openAppSettings));
+        box.addView(permissionSteps, Ui.fullWidth(this, 12));
         box.setVisibility(View.GONE);
         return box;
     }
@@ -524,6 +530,7 @@ public final class ContactsActivity extends Activity {
                     : R.string.contacts_permission_settings_text);
             permissionButton.setText(ask ? R.string.contacts_permission_allow
                     : R.string.contacts_permission_settings);
+            permissionSteps.setVisibility(ask ? View.GONE : View.VISIBLE);
             return;
         }
         refilter();

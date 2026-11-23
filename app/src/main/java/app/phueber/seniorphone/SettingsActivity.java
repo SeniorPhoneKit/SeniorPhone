@@ -302,6 +302,14 @@ public final class SettingsActivity extends Activity {
             }
         });
         phoneApp.addView(make, Ui.fullWidth(this, 8));
+        phoneApp.addView(Steps.button(this, R.string.steps_role_title, R.array.steps_role,
+                R.array.steps_role_notes, new Steps.Action(R.string.settings_phone_app_make, () -> {
+                    if (!Role.request(this)) {
+                        declined = true;
+                        Role.openDefaultAppsSettings(this);
+                    }
+                }), new Steps.Action(R.string.settings_phone_app_choose,
+                        () -> Role.openDefaultAppsSettings(this))), Ui.fullWidth(this, 8));
 
         if (declined) {
             Button choose = Ui.outlined(this, getString(R.string.settings_phone_app_choose));
