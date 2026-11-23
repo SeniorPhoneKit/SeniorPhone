@@ -44,8 +44,11 @@ number pad, **Contacts** (blue address book) opens the contact list.
    the phone.
 2. Open it. Android asks whether to allow installing from this source; allow it
    once.
-3. Open **Contacts**. It asks to become the phone app; say yes. Then allow
-   contacts and notifications.
+3. Open **Contacts**. It asks to become the phone app; say yes, tap the
+   **Phone** that is not marked "Current default" and **Set as default**. Then
+   allow contacts and notifications. If you said no: **Settings → Phone app**
+   has **How? Show the steps**, and so does the contact list when contacts
+   were refused for good (Open settings, Permissions, Contacts, Allow).
 
 Needs Android 8.0 or newer and a phone with a SIM card.
 
@@ -166,7 +169,11 @@ Tastenfeld, **Kontakte** (blaues Adressbuch) öffnet die Kontaktliste.
 2. Öffnen Sie sie. Android fragt, ob aus dieser Quelle installiert werden darf;
    erlauben Sie es einmal.
 3. Öffnen Sie **Kontakte**. Es fragt, ob es die Telefon-App werden soll; sagen Sie
-   Ja. Erlauben Sie dann Kontakte und Benachrichtigungen.
+   Ja, tippen Sie auf das **Telefon** ohne „Aktueller Standard“ und auf **Als
+   Standard festlegen**. Erlauben Sie dann Kontakte und Benachrichtigungen.
+   Haben Sie Nein gesagt: **Einstellungen → Telefon-App** hat **Wie? Schritte
+   zeigen**, ebenso die Kontaktliste, wenn Kontakte dauerhaft abgelehnt wurden
+   (Einstellungen öffnen, Berechtigungen, Kontakte, Zulassen).
 
 Benötigt Android 8.0 oder neuer und ein Telefon mit SIM-Karte.
 

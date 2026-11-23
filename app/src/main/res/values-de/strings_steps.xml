@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="steps_button">Wie? Schritte zeigen</string>
+
+    <string name="steps_role_title">„Telefon“ als Telefon-App festlegen</string>
+    <string-array name="steps_role">
+        <item>Unten auf „Als Telefon-App festlegen“ tippen.</item>
+        <item>Android fragt „Telefon als Standard-App zum Telefonieren festlegen?“: auf das „Telefon“ ohne „Aktueller Standard“ tippen, dann auf „Als Standard festlegen“.</item>
+        <item>Zurück in diese App: Sie zeigt „Dies ist die Telefon-App ✓“.</item>
+    </string-array>
+    <string-array name="steps_role_notes">
+        <item>Fragt Android nicht mehr (nach zweimal „Nein“)? Unten auf „In den Telefon-Einstellungen wählen“ tippen, dann auf „Telefon“ und dort diese App „Telefon“ wählen.</item>
+        <item>Samsung: unter „Apps“, „Standard-Apps auswählen“.</item>
+    </string-array>
+
+    <string name="steps_contacts_title">Zugriff auf Kontakte erlauben</string>
+    <string-array name="steps_contacts">
+        <item>Unten auf „Einstellungen öffnen“ tippen.</item>
+        <item>Auf „Berechtigungen“ tippen.</item>
+        <item>Auf „Kontakte“ tippen.</item>
+        <item>Auf „Zulassen“ tippen.</item>
+        <item>Mit Zurück hierher: Die Kontakte erscheinen.</item>
+    </string-array>
+</resources>
