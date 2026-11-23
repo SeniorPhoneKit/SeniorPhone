@@ -34,7 +34,7 @@ number pad, **Contacts** (blue address book) opens the contact list.
 ## Install
 
 1. Download the latest `SeniorPhone-*.apk` from the
-   [Releases](https://github.com/philipphueber/SeniorPhone/releases) page on
+   [Releases](https://github.com/SeniorPhoneKit/SeniorPhone/releases) page on
    the phone.
 2. Open it. Android asks whether to allow installing from this source; allow it
    once.
@@ -139,7 +139,7 @@ Tastenfeld, **Kontakte** (blaues Adressbuch) öffnet die Kontaktliste.
 ### Installieren
 
 1. Laden Sie auf dem Telefon die neueste `SeniorPhone-*.apk` von der Seite
-   [Releases](https://github.com/philipphueber/SeniorPhone/releases).
+   [Releases](https://github.com/SeniorPhoneKit/SeniorPhone/releases).
 2. Öffnen Sie sie. Android fragt, ob aus dieser Quelle installiert werden darf;
    erlauben Sie es einmal.
 3. Öffnen Sie **Kontakte**. Es fragt, ob es die Telefon-App werden soll; sagen Sie
