@@ -328,4 +328,35 @@ public final class Ui {
         armedAt[0] = SystemClock.uptimeMillis();
         return d;
     }
+
+    /** A message with one OK button (blue), e.g. the result of a backup. Returns the shown dialog. */
+    public static Dialog message(Activity a, CharSequence text) {
+        Dialog d = new Dialog(a);
+        d.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        LinearLayout box = new LinearLayout(a);
+        box.setOrientation(LinearLayout.VERTICAL);
+        int p = dp(a, 24);
+        box.setPadding(p, p, p, p);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(color(a, R.color.card));
+        bg.setCornerRadius(dp(a, 24));
+        box.setBackground(bg);
+        TextView q = bold(a, text, 24);
+        q.setGravity(Gravity.CENTER);
+        box.addView(q);
+        Button ok = button(a, a.getString(R.string.backup_ok), R.color.blue);
+        ok.setOnClickListener(v -> d.dismiss());
+        box.addView(ok, fullWidth(a, 24));
+        ScrollView sv = new ScrollView(a);
+        sv.addView(box);
+        d.setContentView(sv);
+        Window w = d.getWindow();
+        if (w != null) {
+            w.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            w.setLayout(a.getResources().getDisplayMetrics().widthPixels - dp(a, 32),
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+        d.show();
+        return d;
+    }
 }

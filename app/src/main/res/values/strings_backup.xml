@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings backup (BackupFiles, PhoneSettingsBackup). -->
+    <string name="backup_title">Backup</string>
+    <string name="backup_save">Save settings to a file</string>
+    <string name="backup_load">Load settings from a file</string>
+    <string name="backup_explain">Keeps this app’s settings in a file you choose, for example in Downloads or on Google Drive. Load the file again after a reset or on a new phone. Favourites are saved by name and number; the contacts themselves are not.</string>
+    <string name="backup_confirm">Replace the current settings with the ones from the file?</string>
+    <string name="backup_replace">Replace</string>
+    <string name="backup_saved">Saved.</string>
+    <string name="backup_restored">Restored.</string>
+    <string name="backup_not_found">Not found on this phone: %1$s</string>
+    <string name="backup_ok">OK</string>
+    <string name="backup_app_name" translatable="false">SeniorPhone</string>
+    <string name="backup_error_malformed">This file is not a readable settings file. Nothing was changed.</string>
+    <string name="backup_error_newer">This file comes from a newer version of the app. Please update the app first. Nothing was changed.</string>
+    <string name="backup_error_no_entry">This file holds no settings for %1$s. Nothing was changed.</string>
+    <string name="backup_error_locked">The phone is locked. Nothing was changed.</string>
+    <string name="backup_error_no_contacts">The app may not change contacts, so the favourites cannot be restored. Please allow access to contacts first. Nothing was changed.</string>
+    <string name="backup_error_read">The file could not be read. Nothing was changed.</string>
+    <string name="backup_error_save">The file could not be saved.</string>
+    <string name="backup_no_picker">This phone cannot choose files.</string>
+</resources>

@@ -15,7 +15,8 @@ there.
 Contacts and favourites are not stored by the app. They are the phone's own
 address book (`ContactsContract`, favourite = `STARRED`), so they are the same
 in every app and survive a reinstall. The app stores only its lock flag and
-colour theme (`Store`).
+colour theme (`Store`); the favourites can be saved to a file with the
+settings (see Backup).
 
 ## Files
 
@@ -38,7 +39,12 @@ colour theme (`Store`).
 | `MissedCalls` | Receiver for Telecom's `ACTION_SHOW_MISSED_CALLS_NOTIFICATION` (as the phone app, Telecom leaves the notification to us): one big notification, title = caller's name or number, text "Missed call · 14:05" (reads well on SeniorLauncher's notification card), newest missed call from the call log. Tap: the person's page (over the list) or the pad with the number; Call back: the same with "Call …?". Opening, Call back or swiping tells Telecom they were seen (`cancelMissedCallsNotification`). Only our own notification can do that: the swipe goes to the non-exported `MissedCalls.Seen` (the exported `MissedCalls` only takes Telecom's broadcast), and the pad and the list honour the "seen" extra only when started through the non-exported aliases `MissedCallDial` / `MissedCallList` (or on the non-exported contact page), so another app cannot silently clear the missed calls. The call-log VIEW intent (`vnd.android.cursor.dir/calls`) opens the contact list: there is no call-log screen. |
 | `CallState` | Pure: Telecom states to screens, which call gets the screen (never a conference participant: the conference call does, so Hang up ends all of it), why a call ended, the timer text. Unit tested. |
 | `Role` | Asks once per start to become the phone app; Settings shows the state. |
-| `SettingsActivity` | Lock (choose a PIN), Colours, Phone app, phone settings. |
+| `SettingsActivity` | Lock (choose a PIN), Colours, Phone app, phone settings, Backup (hidden while locked). |
+| `Json`, `Backup` | Pure: a small JSON reader/writer (the platform's org.json is a stub in JVM tests) and the family's backup file envelope, typed reads, caller check. The same in every Senior app. Unit tested. |
+| `BackupFiles` | Save and open through the system file picker (SAF), read/write the chosen file. The same in every Senior app. |
+| `PhoneBackup` | Pure: the settings in the file (theme, favourites as name + numbers) and the matching of favourites to this phone's contacts. Unit tested. |
+| `PhoneSettingsBackup` | Export and restore, used by Settings and by `BackupProvider` alike. |
+| `BackupProvider` | `content://app.phueber.seniorphone.backup`: `call("export")` and `call("import", json)` for SeniorLauncher's "all Senior apps" backup. |
 | `Ui`, `Palette` | Copied from SeniorLauncher: shared buttons, screens and dialogs; the four colour themes, contrast-tested. Light is SeniorLauncher's Light, the daylight twin of Dark: blue-grey page #E8EDF4, white cards with a #C3CEDD edge, navy text #14213D, a soft navy `OUTLINE` (#6F82A3) for outlined and helper buttons, Back, the call screen's outlined buttons, the contact page's tiles and the search and form fields, and `RED_TEXT` #951515 for red words; in the other themes `OUTLINE` is their text colour and `RED_TEXT` their red, as before. `Ui.confirm` (every "Call X?") ignores Yes until it has been in front for 0.7 s (again after it gets the focus back), drops taps through another app's window (`filterTouchesWhenObscured`) and, on 12+, hides other apps' overlays while it shows (`HIDE_OVERLAY_WINDOWS`): another app can open the question, so it must not be able to time or disguise the tap on Yes. |
 | `NavBar` | Whether SeniorNav's Back & Home bar is visible: SeniorNav's read-only provider `content://app.phueber.seniornav.bar/state` (column `visible`, also 0 while automation pauses the bar), observed live while the Back button is attached; without that provider, whether its accessibility service is enabled. While the bar shows, the pinned Back button is hidden, since the bar already has Back and Home; also re-checked whenever a screen gets focus. Pure part unit tested. |
 | `Store` | Own lock flag with PIN salt/hash, and theme, in device-protected storage (direct boot); `locked()` is the launcher's lock or our own; `unlock(pin)` lifts both; the reset PIN (`Pin.RESET`) works for either. |
@@ -229,6 +235,49 @@ redraw): a ContentObserver on the address book while the process lives; a
 `ContactsChangedJob` content trigger when it does not; and direct refreshes
 after the app's own star, save, delete, the contacts permission being
 granted, and a colour change. Only while a widget is placed.
+
+## Backup
+
+The helper saves the settings to a file and loads them back (Settings →
+Backup), after a reset or on a new phone. The file goes through the system
+file picker (`ACTION_CREATE_DOCUMENT` / `ACTION_OPEN_DOCUMENT`), so no
+storage permission. It is the Senior family's one format (`Backup`):
+
+    {"format": "seniorphonekit-backup", "version": 1, "created": "2026-11-23T10:15:00Z",
+     "apps": {"app.phueber.seniorphone": {"appVersion": "0.0.2", "settings":
+       {"theme": "DARK", "favourites": [{"name": "Maria Schmidt", "numbers": ["+49 171 2345678"]}]}}}}
+
+SeniorLauncher's all-apps file has an entry per app; this app takes only its
+own. A newer `version` is refused, a broken file or a field of the wrong type
+too, with nothing changed.
+
+- **What.** The theme and the favourites, as name and numbers: contact ids
+  differ per phone, and the address book itself is not ours to copy (it
+  moves with the Google account). Not the lock (a restore leaves it as it
+  is) and not the one-person widget's pick (it belongs to a widget id, new
+  on every phone). Saved without the contacts permission, the file has no
+  `favourites` key, and restoring it leaves the favourites alone; an empty
+  list means none.
+- **Matching** (`PhoneBackup.match`): by number first, for every favourite
+  (`Automation.sameNumber`: same digits, or national vs. +CC in the phone's
+  own country), then by name (case and spacing ignored) for the rest. Each
+  contact is used once, and a name never takes a contact another favourite's
+  number found. Unmatched favourites are listed for the helper.
+- **Replace, all or nothing.** The file is read and checked completely, the
+  helper confirms "Replace the current settings …?", then the theme is set
+  and the favourites become exactly the matched contacts (one batch: stars
+  on, others off). Refused while locked, and, when the file has favourites,
+  without permission to read and write contacts (`no_contacts`): rather
+  nothing than a theme without its favourites.
+- **Provider.** `BackupProvider` answers `call("export")` with `json` and
+  `call("import", json)` with `ok`, plus `skipped` (names not found) or
+  `error` (a `Backup.ERROR_*` code or `no_contacts`) and `message` (the
+  helper's sentence in this app's language). Only SeniorLauncher and the app
+  itself (`getCallingPackage()`, `Backup.callerAllowed`): a sanity check so no
+  other app reads the favourites, not security; exported without a
+  permission because the apps have separate signing keys.
+- **Automation.** None: the file is the helper's pick, and a restore needs
+  the confirm.
 
 ## Permissions
 
