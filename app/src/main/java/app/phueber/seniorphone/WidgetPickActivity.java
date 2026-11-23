@@ -170,7 +170,7 @@ public final class WidgetPickActivity extends Activity {
         s.setPadding(p, Ui.dp(this, 8), p, Ui.dp(this, 8));
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(Ui.color(this, R.color.card));
-        bg.setStroke(Ui.dp(this, 2), Ui.color(this, R.color.text_black));
+        bg.setStroke(Ui.dp(this, 2), Ui.color(this, R.color.outline));
         bg.setCornerRadius(Ui.dp(this, 32));
         s.setBackground(bg);
         s.addTextChangedListener(new TextWatcher() {

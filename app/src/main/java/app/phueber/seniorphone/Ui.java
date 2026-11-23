@@ -82,6 +82,8 @@ public final class Ui {
         if (res == R.color.blue) return Palette.Role.BLUE;
         if (res == R.color.red) return Palette.Role.RED;
         if (res == R.color.red_light) return Palette.Role.RED_LIGHT;
+        if (res == R.color.red_text) return Palette.Role.RED_TEXT;
+        if (res == R.color.outline) return Palette.Role.OUTLINE;
         if (res == R.color.disabled_bg) return Palette.Role.DISABLED_BG;
         if (res == R.color.disabled_text) return Palette.Role.DISABLED_TEXT;
         if (res == R.color.press_dark) return Palette.Role.PRESS_ON_CARD;
@@ -163,12 +165,12 @@ public final class Ui {
         return b;
     }
 
-    /** White card button with a dark border and dark text: secondary actions. */
+    /** White card button with an outline and dark text: secondary actions. */
     public static Button outlined(Context c, CharSequence label) {
         Button b = button(c, label, R.color.card);
         b.setTextColor(color(c, R.color.text_black));
         b.setBackground(ripple(c, R.color.press_dark, color(c, R.color.card),
-                color(c, R.color.text_black), 20));
+                color(c, R.color.outline), 20));
         return b;
     }
 
@@ -195,7 +197,8 @@ public final class Ui {
         b.setGravity(Gravity.CENTER);
         b.setMinimumHeight(dp(a, BUTTON_HEIGHT));
         b.setPadding(dp(a, 16), dp(a, 8), dp(a, 16), dp(a, 8));
-        b.setBackground(ripple(a, R.color.press_dark, color(a, R.color.card), fg, 20));
+        b.setBackground(ripple(a, R.color.press_dark, color(a, R.color.card),
+                color(a, R.color.outline), 20));
         b.setClickable(true);
         b.setFocusable(true);
         b.setContentDescription(a.getString(R.string.back));

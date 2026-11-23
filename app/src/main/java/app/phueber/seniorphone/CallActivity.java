@@ -492,7 +492,7 @@ public final class CallActivity extends Activity implements CallService.Listener
         status.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32);
         status.setTypeface(Typeface.DEFAULT_BOLD);
         status.setTextColor(Ui.color(this, end == CallState.End.ENDED || end == CallState.End.DECLINED
-                ? R.color.text_black : R.color.red));
+                ? R.color.text_black : R.color.red_text));
         show(root);
         shownSig = null; // whatever comes next is built afresh
     }
@@ -688,7 +688,7 @@ public final class CallActivity extends Activity implements CallService.Listener
         b.setBackground(filled
                 ? Ui.ripple(this, R.color.press_light, Ui.color(this, colorRes), 0, 28)
                 : Ui.ripple(this, R.color.press_dark, Ui.color(this, R.color.card),
-                        Ui.color(this, R.color.text_black), 28));
+                        Ui.color(this, R.color.outline), 28));
         b.setClickable(true);
         b.setFocusable(true);
         b.setContentDescription(sub == null ? label : label + ", " + sub);

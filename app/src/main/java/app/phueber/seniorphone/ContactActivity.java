@@ -209,7 +209,7 @@ public final class ContactActivity extends Activity {
                     startActivity(new Intent(this, EditContactActivity.class)
                             .putExtra(EditContactActivity.EXTRA_ID, id));
                 });
-        addTop(R.drawable.ic_contacts_delete, getString(R.string.contacts_delete), R.color.red,
+        addTop(R.drawable.ic_contacts_delete, getString(R.string.contacts_delete), R.color.red_text,
                 v -> askDelete());
     }
 
@@ -222,7 +222,7 @@ public final class ContactActivity extends Activity {
         b.setMinimumHeight(Ui.dp(this, 80));
         b.setPadding(Ui.dp(this, 4), Ui.dp(this, 8), Ui.dp(this, 4), Ui.dp(this, 8));
         b.setBackground(Ui.ripple(this, R.color.press_dark, Ui.color(this, R.color.card),
-                Ui.color(this, R.color.text_black), 20));
+                Ui.color(this, R.color.outline), 20));
         b.setContentDescription(label);
         b.setOnClickListener(click);
         ContactsActivity.asButton(b, null);

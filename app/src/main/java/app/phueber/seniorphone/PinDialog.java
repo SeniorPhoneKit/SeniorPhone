@@ -138,7 +138,7 @@ final class PinDialog {
 
     private static TextView error(Activity a) {
         TextView e = Ui.bold(a, "", 18);
-        e.setTextColor(Ui.color(a, R.color.red));
+        e.setTextColor(Ui.color(a, R.color.red_text));
         e.setGravity(Gravity.CENTER);
         return e;
     }

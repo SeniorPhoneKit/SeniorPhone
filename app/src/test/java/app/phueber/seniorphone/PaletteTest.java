@@ -34,6 +34,22 @@ public class PaletteTest {
         }
     }
 
+    @Test public void outlinesStandOutFromPageAndCardInEveryTheme() {
+        // Outlined buttons, Back, search and form fields: 3:1 for the edge of a
+        // control (WCAG 1.4.11).
+        for (Theme t : Theme.values()) {
+            atLeast(3.0, c(t, Role.OUTLINE, Role.PAGE), t + " outline/page");
+            atLeast(3.0, c(t, Role.OUTLINE, Role.CARD), t + " outline/card");
+        }
+    }
+
+    @Test public void lightRedWordsReachAaa() {
+        // "Wrong PIN.", Delete, "Missed call" on the Light card and page. The
+        // other themes keep their red as it was.
+        atLeast(AAA, c(Theme.LIGHT, Role.RED_TEXT, Role.CARD), "light red text/card");
+        atLeast(AAA, c(Theme.LIGHT, Role.RED_TEXT, Role.PAGE), "light red text/page");
+    }
+
     @Test public void whiteButtonTextIsReadableOnEveryActionColour() {
         for (Theme t : Theme.values()) {
             for (Role r : new Role[] {Role.GREEN, Role.BLUE, Role.RED}) {
