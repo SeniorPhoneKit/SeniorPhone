@@ -102,7 +102,7 @@ public final class EditContactActivity extends Activity {
         bottom.setOrientation(LinearLayout.VERTICAL);
         bottom.setPadding(p, Ui.dp(this, 4), p, Ui.dp(this, 12));
         error = Ui.bold(this, "", Ui.TEXT_BODY);
-        error.setTextColor(Ui.color(this, R.color.red));
+        error.setTextColor(Ui.color(this, R.color.red_text));
         error.setVisibility(View.GONE);
         // Spoken as soon as it appears, so a TalkBack user knows why nothing happened.
         error.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
@@ -171,7 +171,7 @@ public final class EditContactActivity extends Activity {
         e.setPadding(p, Ui.dp(this, 8), p, Ui.dp(this, 8));
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(Ui.color(this, R.color.card));
-        bg.setStroke(Ui.dp(this, 2), Ui.color(this, R.color.text_black));
+        bg.setStroke(Ui.dp(this, 2), Ui.color(this, R.color.outline));
         bg.setCornerRadius(Ui.dp(this, 16));
         e.setBackground(bg);
         form.addView(e, Ui.fullWidth(this, 6));

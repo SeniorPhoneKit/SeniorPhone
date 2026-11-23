@@ -147,7 +147,7 @@ public final class SettingsActivity extends Activity {
             return;
         }
         state = Ui.bold(this, getString(R.string.settings_phone_app_no), Ui.TEXT_BUTTON);
-        state.setTextColor(Ui.color(this, R.color.red));
+        state.setTextColor(Ui.color(this, R.color.red_text));
         phoneApp.addView(state, Ui.fullWidth(this, 8));
 
         Button make = Ui.button(this, getString(R.string.settings_phone_app_make), R.color.green);
