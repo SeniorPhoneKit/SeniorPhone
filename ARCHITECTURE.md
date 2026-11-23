@@ -61,7 +61,7 @@ settings (see Backup).
 | `PhoneWidgets` | What both widgets share: the remembered person (id + lookup key), coalesced refresh, ContentObserver, round pictures, taps. |
 | `ContactsChangedJob` | JobScheduler content trigger on the address book: redraws the widgets while the app is not running. |
 | `WidgetModel` | Pure: first name for the button, favourites order, how many rows fit a height (`fit`), the stored pick. Unit tested. |
-| `PinDialog` | Choose a PIN (twice); enter it to unlock. The unlock prompt closes after 10 s without typing. |
+| `PinDialog` | Choose a PIN (twice); enter it to unlock. The unlock prompt closes after 5 s without typing. |
 
 ## A call can always be answered, declined and ended
 
@@ -117,7 +117,7 @@ explains that. Holding the padlock here asks for the home screen's PIN and
 lifts the lock in place, for the whole phone, so the helper never has to go
 back to the home screen. Without the launcher, Settings → Lock (choose a PIN)
 is this app's own lock, unlocked the same way. The PIN prompt never lingers:
-it closes after 10 s without typing.
+it closes after 5 s without typing.
 
 Locked: Settings is replaced by a padlock, the star buttons go, a favourite shows its
 star inside its pill on the right, and New contact, Edit and Delete
